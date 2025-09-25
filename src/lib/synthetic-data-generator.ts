@@ -1,6 +1,7 @@
 import { db } from './db';
-import { insuranceClaim, riskAssessment } from './schema';
+import { insuranceClaim, riskAssessment, fraudDetection } from './schema';
 import { generateId } from './utils';
+import { eq, sql } from 'drizzle-orm';
 
 interface ClaimData {
   claimedAmount: number;
@@ -157,7 +158,7 @@ function generateFiscalCode(name: string, surname: string, birthDate: Date): str
 }
 
 // Risk scoring logic for synthetic fraud patterns
-function calculateRiskScore(claim: ClaimData): number {
+function calculateRiskScore(claim: ClaimData, fraudPercentage: number): number {
   let riskScore = randomInt(1, 100);
   
   // Increase risk based on various factors
@@ -166,15 +167,15 @@ function calculateRiskScore(claim: ClaimData): number {
   if (claim.claimType === 'THEFT') riskScore += 25;
   if (claim.vehicleYear < 2010) riskScore += 10;
   
-  // Add some fraud patterns
-  if (Math.random() < 0.15) { // 15% chance of high-risk pattern
+  // Add fraud patterns based on specified percentage
+  if (Math.random() < fraudPercentage / 100) { // Dynamic chance based on fraud percentage
     riskScore += randomInt(20, 40);
   }
   
   return Math.min(100, Math.max(1, riskScore));
 }
 
-function generateFraudIndicators(claim: ClaimData): FraudIndicator[] {
+function generateFraudIndicators(claim: ClaimData, fraudPercentage: number): FraudIndicator[] {
   const indicators = [];
   
   if (claim.incidentHour >= 22 || claim.incidentHour <= 6) {
@@ -193,11 +194,21 @@ function generateFraudIndicators(claim: ClaimData): FraudIndicator[] {
     });
   }
   
-  if (Math.random() < 0.05) { // 5% chance of suspicious pattern
+  // Add behavioral indicators based on fraud percentage
+  if (Math.random() < (fraudPercentage / 100) * 0.33) { // Scale with fraud percentage
     indicators.push({
       type: 'BEHAVIORAL',
       description: 'Pattern comportamentale sospetto',
       riskImpact: 30
+    });
+  }
+  
+  // Add additional fraud indicators for higher percentages
+  if (fraudPercentage > 30 && Math.random() < (fraudPercentage - 30) / 100) {
+    indicators.push({
+      type: 'PATTERN',
+      description: 'Pattern di frode multipli rilevati',
+      riskImpact: 25
     });
   }
   
@@ -232,7 +243,7 @@ export interface SyntheticClaimData {
   fraudIndicators: FraudIndicator[];
 }
 
-export function generateSyntheticClaim(): SyntheticClaimData {
+export function generateSyntheticClaim(fraudPercentage: number = 15): SyntheticClaimData {
   const firstName = randomElement(firstNames);
   const lastName = randomElement(lastNames);
   const birthDate = randomDate(new Date('1950-01-01'), new Date('2005-12-31'));
@@ -263,8 +274,8 @@ export function generateSyntheticClaim(): SyntheticClaimData {
     location: city.city
   };
   
-  const riskScore = calculateRiskScore(claim);
-  const fraudIndicators = generateFraudIndicators(claim);
+  const riskScore = calculateRiskScore(claim, fraudPercentage);
+  const fraudIndicators = generateFraudIndicators(claim, fraudPercentage);
   
   const claimNumber = `CLM-${incidentDate.getFullYear()}-${randomInt(1000, 9999).toString().padStart(4, '0')}`;
   const policyNumber = `POL-${randomInt(100000, 999999)}`;
@@ -341,11 +352,11 @@ function generateClaimDescription(claimType: string): string {
   return randomElement(descArray);
 }
 
-export async function generateSyntheticClaims(count: number): Promise<SyntheticClaimData[]> {
+export async function generateSyntheticClaims(count: number, fraudPercentage: number = 15): Promise<SyntheticClaimData[]> {
   const claims: SyntheticClaimData[] = [];
   
   for (let i = 0; i < count; i++) {
-    const claim = generateSyntheticClaim();
+    const claim = generateSyntheticClaim(fraudPercentage);
     claims.push(claim);
   }
   
@@ -390,10 +401,82 @@ export async function insertSyntheticClaims(claims: SyntheticClaimData[]): Promi
   }
 }
 
-export async function generateAndInsertClaims(count: number): Promise<void> {
+// Count existing synthetic claims
+export async function countExistingClaims(): Promise<number> {
+  try {
+    const result = await db.select({ count: sql<number>`count(*)::int` })
+      .from(insuranceClaim);
+    return result[0]?.count || 0;
+  } catch (error) {
+    console.error('Error counting existing claims:', error);
+    return 0;
+  }
+}
+
+// Delete existing synthetic claims and related data
+export async function deleteExistingClaims(): Promise<{ deletedClaims: number; deletedAssessments: number; deletedDetections: number }> {
+  try {
+    console.log('Deleting existing synthetic claims...');
+    
+    // Count records before deletion
+    const claimCount = await countExistingClaims();
+    
+    if (claimCount === 0) {
+      return { deletedClaims: 0, deletedAssessments: 0, deletedDetections: 0 };
+    }
+    
+    // Delete related records first (foreign key constraints will handle cascading deletes)
+    const assessmentCountResult = await db.select({ count: sql<number>`count(*)::int` })
+      .from(riskAssessment)
+      .where(eq(riskAssessment.claimId, sql`any(select id from insurance_claim)`));
+    
+    const detectionCountResult = await db.select({ count: sql<number>`count(*)::int` })
+      .from(fraudDetection)
+      .where(eq(fraudDetection.claimId, sql`any(select id from insurance_claim)`));
+    
+    const assessmentCount = assessmentCountResult[0]?.count || 0;
+    const detectionCount = detectionCountResult[0]?.count || 0;
+    
+    // Delete claims (this will cascade delete related records due to foreign key constraints)
+    const deleteResult = await db.delete(insuranceClaim).returning({ id: insuranceClaim.id });
+    const deletedClaimCount = deleteResult.length;
+    
+    console.log(`Deleted ${deletedClaimCount} claims, ${assessmentCount} assessments, ${detectionCount} detections`);
+    
+    return {
+      deletedClaims: deletedClaimCount,
+      deletedAssessments: assessmentCount,
+      deletedDetections: detectionCount
+    };
+  } catch (error) {
+    console.error('Error deleting existing claims:', error);
+    throw error;
+  }
+}
+
+export async function generateAndInsertClaims(count: number, fraudPercentage: number = 15, clearExisting: boolean = true): Promise<{
+  generatedClaims: number;
+  deletedClaims?: number;
+  deletedAssessments?: number;
+  deletedDetections?: number;
+}> {
+  console.log(`Starting synthetic claims generation with ${fraudPercentage}% fraud rate...`);
+  
+  let deletionResult = null;
+  
+  // Clear existing data if requested
+  if (clearExisting) {
+    deletionResult = await deleteExistingClaims();
+  }
+  
   console.log(`Generating ${count} synthetic claims...`);
-  const claims = await generateSyntheticClaims(count);
+  const claims = await generateSyntheticClaims(count, fraudPercentage);
   console.log(`Inserting ${claims.length} claims into database...`);
   await insertSyntheticClaims(claims);
-  console.log('Synthetic claims generation completed!');
+  console.log(`Synthetic claims generation completed with ${fraudPercentage}% fraud rate!`);
+  
+  return {
+    generatedClaims: claims.length,
+    ...deletionResult
+  };
 }
