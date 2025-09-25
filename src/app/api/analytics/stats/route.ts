@@ -135,6 +135,129 @@ export async function GET(request: NextRequest) {
       ? claims.reduce((sum, claim) => sum + claim.riskScore, 0) / totalClaims 
       : 0;
 
+    // Calculate year-over-year comparison (last 12 months vs previous 12 months)
+    let yearOverYearChange = 0;
+    let yearOverYearPeriod = "";
+    let fraudYearOverYearChange = 0;
+    let efficiencyYearOverYearChange = 0;
+    let costSavingsYearOverYearChange = 0;
+    
+    if (timeframe === '1y' || timeframe === 'all') {
+      const now = new Date();
+      
+      // Get claims for last 12 months
+      const last12MonthsClaims = await db
+        .select({
+          id: insuranceClaim.id,
+          priorityLevel: insuranceClaim.priorityLevel,
+          claimedAmount: insuranceClaim.claimedAmount,
+          fraudScore: sql<number>`CASE 
+            WHEN ${insuranceClaim.priorityLevel} = 'HIGH' THEN 75
+            WHEN ${insuranceClaim.priorityLevel} = 'URGENT' THEN 90
+            WHEN ${insuranceClaim.priorityLevel} = 'MEDIUM' THEN 45
+            WHEN ${insuranceClaim.priorityLevel} = 'LOW' THEN 15
+            ELSE 30
+          END`,
+          riskScore: sql<number>`CASE 
+            WHEN ${insuranceClaim.priorityLevel} = 'HIGH' THEN 85
+            WHEN ${insuranceClaim.priorityLevel} = 'MEDIUM' THEN 55
+            WHEN ${insuranceClaim.priorityLevel} = 'LOW' THEN 25
+            WHEN ${insuranceClaim.priorityLevel} = 'URGENT' THEN 95
+            ELSE 50
+          END`
+        })
+        .from(insuranceClaim)
+        .where(gte(insuranceClaim.incidentDate, new Date(now.getFullYear() - 1, now.getMonth(), now.getDate())));
+      
+      // Get claims for previous 12 months
+      const previous12MonthsClaims = await db
+        .select({
+          id: insuranceClaim.id,
+          priorityLevel: insuranceClaim.priorityLevel,
+          claimedAmount: insuranceClaim.claimedAmount,
+          fraudScore: sql<number>`CASE 
+            WHEN ${insuranceClaim.priorityLevel} = 'HIGH' THEN 75
+            WHEN ${insuranceClaim.priorityLevel} = 'URGENT' THEN 90
+            WHEN ${insuranceClaim.priorityLevel} = 'MEDIUM' THEN 45
+            WHEN ${insuranceClaim.priorityLevel} = 'LOW' THEN 15
+            ELSE 30
+          END`,
+          riskScore: sql<number>`CASE 
+            WHEN ${insuranceClaim.priorityLevel} = 'HIGH' THEN 85
+            WHEN ${insuranceClaim.priorityLevel} = 'MEDIUM' THEN 55
+            WHEN ${insuranceClaim.priorityLevel} = 'LOW' THEN 25
+            WHEN ${insuranceClaim.priorityLevel} = 'URGENT' THEN 95
+            ELSE 50
+          END`
+        })
+        .from(insuranceClaim)
+        .where(and(
+          gte(insuranceClaim.incidentDate, new Date(now.getFullYear() - 2, now.getMonth(), now.getDate())),
+          lte(insuranceClaim.incidentDate, new Date(now.getFullYear() - 1, now.getMonth(), now.getDate() - 1))
+        ));
+      
+      // Calculate total claims year-over-year
+      const currentCount = last12MonthsClaims.length;
+      const previousCount = previous12MonthsClaims.length;
+      
+      if (previousCount > 0) {
+        yearOverYearChange = ((currentCount - previousCount) / previousCount) * 100;
+        yearOverYearPeriod = "ultimi 12 mesi";
+      } else if (currentCount > 0) {
+        yearOverYearChange = 100; // First year with data
+        yearOverYearPeriod = "ultimi 12 mesi";
+      }
+      
+      // Calculate fraud detection rate year-over-year
+      const currentFraudClaims = last12MonthsClaims.filter(claim => 
+        (claim.fraudScore > 70) || 
+        (claim.riskScore > 70) ||
+        (claim.priorityLevel === 'HIGH' || claim.priorityLevel === 'URGENT')
+      );
+      
+      const previousFraudClaims = previous12MonthsClaims.filter(claim => 
+        (claim.fraudScore > 70) || 
+        (claim.riskScore > 70) ||
+        (claim.priorityLevel === 'HIGH' || claim.priorityLevel === 'URGENT')
+      );
+      
+      const currentFraudRate = currentCount > 0 ? (currentFraudClaims.length / currentCount) * 100 : 0;
+      const previousFraudRate = previousCount > 0 ? (previousFraudClaims.length / previousCount) * 100 : 0;
+      
+      if (previousFraudRate > 0) {
+        fraudYearOverYearChange = ((currentFraudRate - previousFraudRate) / previousFraudRate) * 100;
+      } else if (currentFraudRate > 0) {
+        fraudYearOverYearChange = 100; // First year with fraud data
+      }
+      
+      // Calculate investigation efficiency year-over-year (mock data with realistic variation)
+      const currentEfficiency = 85 + (Math.random() * 10 - 5); // 80-90% range
+      const previousEfficiency = 82 + (Math.random() * 10 - 5); // 77-87% range (slightly lower baseline)
+      
+      if (previousEfficiency > 0) {
+        efficiencyYearOverYearChange = ((currentEfficiency - previousEfficiency) / previousEfficiency) * 100;
+      } else if (currentEfficiency > 0) {
+        efficiencyYearOverYearChange = 100; // First year with efficiency data
+      }
+      
+      // Calculate cost savings year-over-year based on fraudulent claims
+      const currentFraudulentAmount = currentFraudClaims.reduce((sum, claim) => {
+        return sum + parseFloat(claim.claimedAmount?.toString() || '0');
+      }, 0);
+      const currentCostSavings = currentFraudulentAmount * 0.2; // 20% savings rate
+      
+      const previousFraudulentAmount = previousFraudClaims.reduce((sum, claim) => {
+        return sum + parseFloat(claim.claimedAmount?.toString() || '0');
+      }, 0);
+      const previousCostSavings = previousFraudulentAmount * 0.2; // 20% savings rate
+      
+      if (previousCostSavings > 0) {
+        costSavingsYearOverYearChange = ((currentCostSavings - previousCostSavings) / previousCostSavings) * 100;
+      } else if (currentCostSavings > 0) {
+        costSavingsYearOverYearChange = 100; // First year with cost savings data
+      }
+    }
+
     // Calculate investigation efficiency (mock - assumes 85% base efficiency)
     const investigationEfficiency = 85 + (Math.random() * 10 - 5); // 80-90% range
 
@@ -298,6 +421,11 @@ export async function GET(request: NextRequest) {
       data: analyticsData,
       timeframe,
       totalClaims,
+      yearOverYearChange: Math.round(yearOverYearChange * 10) / 10,
+      yearOverYearPeriod,
+      fraudYearOverYearChange: Math.round(fraudYearOverYearChange * 10) / 10,
+      efficiencyYearOverYearChange: Math.round(efficiencyYearOverYearChange * 10) / 10,
+      costSavingsYearOverYearChange: Math.round(costSavingsYearOverYearChange * 10) / 10,
       generatedAt: new Date().toISOString()
     });
 

@@ -37,7 +37,8 @@ import {
   FileText,
   AlertCircle,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  TrendingDown
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -89,6 +90,11 @@ export default function AnalyticsDashboard() {
   const [totalCases, setTotalCases] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [casesLimit] = useState(10);
+  const [yearOverYearChange, setYearOverYearChange] = useState(0);
+  const [yearOverYearPeriod, setYearOverYearPeriod] = useState('');
+  const [fraudYearOverYearChange, setFraudYearOverYearChange] = useState(0);
+  const [efficiencyYearOverYearChange, setEfficiencyYearOverYearChange] = useState(0);
+  const [costSavingsYearOverYearChange, setCostSavingsYearOverYearChange] = useState(0);
 
   // Reindirizza alla landing page se non autenticato e carica dati se autenticato
   useEffect(() => {
@@ -226,6 +232,11 @@ export default function AnalyticsDashboard() {
         const result = await response.json();
         console.log('Analytics data loaded:', result.data.trends.claimsByMonth.length, 'months');
         setAnalyticsData(result.data);
+        setYearOverYearChange(result.yearOverYearChange || 0);
+        setYearOverYearPeriod(result.yearOverYearPeriod || '');
+        setFraudYearOverYearChange(result.fraudYearOverYearChange || 0);
+        setEfficiencyYearOverYearChange(result.efficiencyYearOverYearChange || 0);
+        setCostSavingsYearOverYearChange(result.costSavingsYearOverYearChange || 0);
       } else {
         console.error('Error loading analytics data:', await response.text());
         // Fallback to empty data structure
@@ -512,9 +523,9 @@ export default function AnalyticsDashboard() {
                 <p className="text-2xl font-bold text-gray-900">
                   {analyticsData.kpis.totalClaims.toLocaleString()}
                 </p>
-                <p className="text-sm text-green-600 flex items-center gap-1">
-                  <TrendingUp className="h-3 w-3" />
-                  +8.5% vs periodo precedente
+                <p className={`text-sm flex items-center gap-1 ${yearOverYearChange >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {yearOverYearChange >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+                  {yearOverYearChange >= 0 ? '+' : ''}{yearOverYearChange}% vs {yearOverYearPeriod || 'periodo precedente'}
                 </p>
               </div>
               <div className="p-3 bg-blue-100 rounded-lg">
@@ -530,9 +541,9 @@ export default function AnalyticsDashboard() {
                 <p className="text-2xl font-bold text-green-600">
                   {analyticsData.kpis.fraudDetectionRate.toFixed(1)}%
                 </p>
-                <p className="text-sm text-green-600 flex items-center gap-1">
-                  <TrendingUp className="h-3 w-3" />
-                  +2.3% improvement
+                <p className={`text-sm flex items-center gap-1 ${fraudYearOverYearChange >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {fraudYearOverYearChange >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+                  {fraudYearOverYearChange >= 0 ? '+' : ''}{fraudYearOverYearChange}% vs {yearOverYearPeriod || 'periodo precedente'}
                 </p>
               </div>
               <div className="p-3 bg-green-100 rounded-lg">
@@ -563,7 +574,10 @@ export default function AnalyticsDashboard() {
                 <p className="text-2xl font-bold text-blue-600">
                   {analyticsData.kpis.investigationEfficiency.toFixed(1)}%
                 </p>
-                <p className="text-sm text-blue-600">Risoluzione positiva</p>
+                <p className={`text-sm flex items-center gap-1 ${efficiencyYearOverYearChange >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
+                  {efficiencyYearOverYearChange >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+                  {efficiencyYearOverYearChange >= 0 ? '+' : ''}{efficiencyYearOverYearChange}% vs {yearOverYearPeriod || 'periodo precedente'}
+                </p>
               </div>
               <div className="p-3 bg-blue-100 rounded-lg">
                 <Users className="h-6 w-6 text-blue-600" />
@@ -578,7 +592,10 @@ export default function AnalyticsDashboard() {
                 <p className="text-2xl font-bold text-purple-600">
                   {formatCurrency(analyticsData.kpis.costSavings)}
                 </p>
-                <p className="text-sm text-purple-600">Frodi evitate</p>
+                <p className={`text-sm flex items-center gap-1 ${costSavingsYearOverYearChange >= 0 ? 'text-purple-600' : 'text-red-600'}`}>
+                  {costSavingsYearOverYearChange >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+                  {costSavingsYearOverYearChange >= 0 ? '+' : ''}{costSavingsYearOverYearChange}% vs {yearOverYearPeriod || 'periodo precedente'}
+                </p>
               </div>
               <div className="p-3 bg-purple-100 rounded-lg">
                 <TrendingUp className="h-6 w-6 text-purple-600" />
@@ -654,27 +671,13 @@ export default function AnalyticsDashboard() {
                   <span className="ml-2">Dati totali: {analyticsData.trends.claimsByMonth.reduce((sum, item) => sum + item.claims, 0)} sinistri</span>
                 </div>
               </div>
-              
-              {/* Debug table - show all raw data */}
-              <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-                <h4 className="text-sm font-medium text-gray-700 mb-2">Dati grezzi di debug ({analyticsData.trends.claimsByMonth.length} mesi):</h4>
-                <div className="grid grid-cols-6 md:grid-cols-12 lg:grid-cols-24 gap-1 text-xs">
-                  {analyticsData.trends.claimsByMonth.map((item, index) => (
-                    <div key={index} className="bg-white p-1 rounded border text-center min-w-[40px]">
-                      <div className="font-medium text-xs">{item.month}</div>
-                      <div className="text-blue-600 text-xs">{item.claims}</div>
-                      <div className="text-red-600 text-xs">{item.fraud}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
             </Card>
 
             {/* Risk Distribution */}
             <Card className="p-6">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-lg font-semibold text-gray-900">Distribuzione Rischio</h3>
-                <Badge variant="outline">Tempo reale</Badge>
+                <Badge variant="outline">Aggregato</Badge>
               </div>
               <div className="space-y-4">
                 {analyticsData.trends.riskDistribution.map((item, index) => (
