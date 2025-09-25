@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSession } from "@/lib/auth-client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -14,11 +15,41 @@ import {
   Upload,
   Settings
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function SyntheticDataPage() {
+  const { data: session, isPending } = useSession();
+  const router = useRouter();
+  
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedCount, setGeneratedCount] = useState(0);
   const [generationStatus, setGenerationStatus] = useState<string | null>(null);
+
+  // Reindirizza alla landing page se non autenticato
+  useEffect(() => {
+    if (!isPending && !session) {
+      router.push('/landing');
+    }
+  }, [session, isPending, router]);
+
+  if (isPending) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (!session) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-gray-600">Reindirizzamento...</p>
+        </div>
+      </div>
+    );
+  }
 
   const handleGenerateData = async (count: number) => {
     setIsGenerating(true);

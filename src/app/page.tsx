@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSession } from "@/lib/auth-client";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -15,6 +16,7 @@ import {
   Search
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 interface DashboardStats {
   totalClaims: number;
@@ -36,6 +38,9 @@ interface RecentActivity {
 }
 
 export default function Home() {
+  const { data: session, isPending } = useSession();
+  const router = useRouter();
+  
   const [stats, setStats] = useState<DashboardStats>({
     totalClaims: 0,
     highRiskClaims: 0,
@@ -48,11 +53,19 @@ export default function Home() {
   const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Reindirizza alla landing page se non autenticato
   useEffect(() => {
-    // Simulate loading dashboard data
-    const loadDashboardData = async () => {
-      // In a real app, this would fetch from API endpoints
-      await new Promise(resolve => setTimeout(resolve, 1000));
+    if (!isPending && !session) {
+      router.push('/landing');
+    }
+  }, [session, isPending, router]);
+
+  useEffect(() => {
+    // Load dashboard data only if authenticated
+    if (session) {
+      const loadDashboardData = async () => {
+        // In a real app, this would fetch from API endpoints
+        await new Promise(resolve => setTimeout(resolve, 1000));
       
       setStats({
         totalClaims: 1247,
@@ -103,10 +116,11 @@ export default function Home() {
       ]);
 
       setLoading(false);
-    };
+      };
 
-    loadDashboardData();
-  }, []);
+      loadDashboardData();
+    }
+  }, [session]);
 
   const getRiskColor = (score: number) => {
     if (score <= 30) return "bg-green-500";

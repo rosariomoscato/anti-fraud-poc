@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSession } from "@/lib/auth-client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +19,7 @@ import {
   MapPin,
   TrendingUp
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface Investigation {
   id: string;
@@ -45,15 +47,42 @@ interface InvestigationStats {
 }
 
 export default function InvestigationsPage() {
+  const { data: session, isPending } = useSession();
+  const router = useRouter();
+  
   const [investigations, setInvestigations] = useState<Investigation[]>([]);
   const [stats, setStats] = useState<InvestigationStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedStatus, setSelectedStatus] = useState<string>('ALL');
   const [selectedPriority, setSelectedPriority] = useState<string>('ALL');
 
+  // Reindirizza alla landing page se non autenticato e carica dati se autenticato
   useEffect(() => {
-    loadInvestigationsData();
-  }, []);
+    if (!isPending && !session) {
+      router.push('/landing');
+    } else if (session) {
+      loadInvestigationsData();
+    }
+  }, [session, isPending, router]);
+
+  if (isPending) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (!session) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-gray-600">Reindirizzamento...</p>
+        </div>
+      </div>
+    );
+  }
 
   const loadInvestigationsData = async () => {
     setLoading(true);

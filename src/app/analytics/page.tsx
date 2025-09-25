@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSession } from "@/lib/auth-client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -17,6 +18,7 @@ import {
   Users,
   Shield
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface AnalyticsData {
   kpis: {
@@ -40,14 +42,41 @@ interface AnalyticsData {
 }
 
 export default function AnalyticsDashboard() {
+  const { data: session, isPending } = useSession();
+  const router = useRouter();
+  
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedTimeframe, setSelectedTimeframe] = useState<'7d' | '30d' | '90d' | '1y'>('30d');
   const [activeTab, setActiveTab] = useState<'overview' | 'cases' | 'patterns' | 'geographic'>('overview');
 
+  // Reindirizza alla landing page se non autenticato e carica dati se autenticato
   useEffect(() => {
-    loadAnalyticsData();
-  }, [selectedTimeframe]);
+    if (!isPending && !session) {
+      router.push('/landing');
+    } else if (session) {
+      loadAnalyticsData();
+    }
+  }, [session, isPending, router, selectedTimeframe]);
+
+  if (isPending) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (!session) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-gray-600">Reindirizzamento...</p>
+        </div>
+      </div>
+    );
+  }
 
   const loadAnalyticsData = async () => {
     setLoading(true);
