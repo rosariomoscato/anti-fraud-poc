@@ -185,10 +185,11 @@ export default function SyntheticDataPage() {
 
   const fraudPercentagePresets = [
     { percentage: 0, label: '0% - Nessuna frode', description: 'Dataset pulito per test baseline' },
-    { percentage: 5, label: '5% - Basso rischio', description: 'Scenario realistico standard' },
+    { percentage: 5, label: '5% - Rischio basso', description: 'Scenario realistico standard' },
     { percentage: 15, label: '15% - Rischio moderato', description: 'Scenario con frode significativa' },
-    { percentage: 30, label: '30% - Alto rischio', description: 'Scenario ad alto rischio frodi' },
-    { percentage: 50, label: '50% - Rischio estremo', description: 'Test algoritmi in condizioni estreme' },
+    { percentage: 30, label: '30% - Rischio alto', description: 'Scenario ad alto rischio frodi' },
+    { percentage: 50, label: '50% - Rischio molto alto', description: 'Scenario a rischio frodi molto alto' },
+    { percentage: 75, label: '75% - Rischio estremo', description: 'Scenario a rischio frodi estremo' },
   ];
 
   const dataQualityMetrics = [
@@ -293,7 +294,7 @@ export default function SyntheticDataPage() {
           </div>
         </Card>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="space-y-8">
           {/* Fraud Percentage Control */}
           <Card className="p-6 mb-6">
             <h2 className="text-xl font-semibold text-gray-900 mb-6">Percentuale Frodi</h2>
@@ -403,8 +404,10 @@ export default function SyntheticDataPage() {
           )}
           </Card>
 
+        </div>
+
           {/* Data Generation */}
-          <Card className="p-6">
+          <Card className="p-6 mt-8">
             <h2 className="text-xl font-semibold text-gray-900 mb-6">Genera Dataset</h2>
             <div className="space-y-4">
               {dataGenerationOptions.map((option, index) => (
@@ -457,22 +460,24 @@ export default function SyntheticDataPage() {
             )}
           </Card>
 
-          {/* Data Features */}
-          <div className="space-y-6">
+        {/* Data Features */}
+        <Card className="p-6 mt-8">
+          <h2 className="text-xl font-semibold text-gray-900 mb-6">Caratteristiche dei Dati</h2>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             {dataFeatures.map((feature, index) => (
-              <Card key={index} className="p-6">
-                <div className="flex items-start space-x-4">
-                  <div className="p-2 bg-purple-100 rounded-lg">
-                    <feature.icon className="h-5 w-5 text-purple-600" />
+              <Card key={index} className="p-4">
+                <div className="flex flex-col items-center text-center space-y-3">
+                  <div className="p-3 bg-purple-100 rounded-lg">
+                    <feature.icon className="h-6 w-6 text-purple-600" />
                   </div>
-                  <div className="flex-1">
-                    <h3 className="font-medium text-gray-900 mb-2">{feature.title}</h3>
-                    <p className="text-sm text-gray-600 mb-3">{feature.description}</p>
+                  <div className="flex-1 w-full">
+                    <h3 className="font-semibold text-gray-900 text-sm mb-2">{feature.title}</h3>
+                    <p className="text-xs text-gray-600 mb-3 leading-relaxed">{feature.description}</p>
                     <ul className="space-y-1">
                       {feature.features.map((feat, featIndex) => (
-                        <li key={featIndex} className="text-sm text-gray-500 flex items-center">
-                          <div className="w-1 h-1 bg-purple-400 rounded-full mr-2"></div>
-                          {feat}
+                        <li key={featIndex} className="text-xs text-gray-500 flex items-start">
+                          <div className="w-1 h-1 bg-purple-400 rounded-full mr-2 mt-2 flex-shrink-0"></div>
+                          <span className="text-left leading-tight">{feat}</span>
                         </li>
                       ))}
                     </ul>
@@ -481,7 +486,7 @@ export default function SyntheticDataPage() {
               </Card>
             ))}
           </div>
-        </div>
+        </Card>
 
         {/* Export Options */}
         <Card className="p-6 mt-8">
