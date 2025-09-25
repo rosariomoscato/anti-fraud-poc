@@ -11,19 +11,7 @@ A complete agentic coding boilerplate with authentication, PostgreSQL database, 
 - **⚡ Modern Stack**: Next.js 15, React 19, TypeScript
 - **📱 Responsive**: Mobile-first design approach
 
-## 🎥 Video Tutorial
 
-Watch the complete walkthrough of this agentic coding template:
-
-[![Agentic Coding Boilerplate Tutorial](https://img.youtube.com/vi/T0zFZsr_d0Q/maxresdefault.jpg)](https://youtu.be/T0zFZsr_d0Q)
-
-<a href="https://youtu.be/T0zFZsr_d0Q" target="_blank" rel="noopener noreferrer">🔗 Watch on YouTube</a>
-
-## ☕ Support This Project
-
-If this boilerplate helped you build something awesome, consider buying me a coffee!
-
-[![Buy me a coffee](https://img.shields.io/badge/Buy_Me_A_Coffee-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://www.buymeacoffee.com/leonvanzyl)
 
 ## 📋 Prerequisites
 
@@ -40,7 +28,7 @@ Before you begin, ensure you have the following installed on your machine:
 **Option A: Clone with Git**
 
 ```bash
-git clone https://github.com/leonvanzyl/agentic-coding-starter-kit.git
+git clone https://gitea.rosmoscato.xyz/ros/agentic-coding-starter-kit.git
 cd agentic-coding-starter-kit
 ```
 
@@ -203,11 +191,6 @@ Ensure these are set in your production environment:
 - `OPENAI_MODEL` - OpenAI model name (optional, defaults to gpt-5-mini)
 - `NEXT_PUBLIC_APP_URL` - Your production domain
 
-## 🎥 Tutorial Video
-
-Watch my comprehensive tutorial on how to use this agentic coding boilerplate to build AI-powered applications:
-
-<a href="https://youtu.be/T0zFZsr_d0Q" target="_blank" rel="noopener noreferrer">📺 YouTube Tutorial - Building with Agentic Coding Boilerplate</a>
 
 ## 🤝 Contributing
 
@@ -225,7 +208,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 If you encounter any issues:
 
-1. Check the [Issues](https://github.com/leonvanzyl/agentic-coding-starter-kit/issues) section
+1. Check the [Issues](https://gitea.rosmoscato.xyz/ros/agentic-coding-starter-kit/issues) section
 2. Review the documentation above
 3. Create a new issue with detailed information about your problem
 
