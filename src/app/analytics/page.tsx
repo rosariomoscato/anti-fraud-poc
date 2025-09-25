@@ -5,6 +5,13 @@ import { useSession } from "@/lib/auth-client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { 
   XAxis, 
   YAxis, 
@@ -59,6 +66,9 @@ export default function AnalyticsDashboard() {
   const [loading, setLoading] = useState(true);
   const [selectedTimeframe, setSelectedTimeframe] = useState<'7d' | '30d' | '90d' | '1y' | 'all'>('all');
   const [activeTab, setActiveTab] = useState<'overview' | 'cases' | 'patterns' | 'geographic'>('overview');
+  const [selectedCity, setSelectedCity] = useState<string | null>(null);
+  const [cityDetails, setCityDetails] = useState<any>(null);
+  const [cityDetailsLoading, setCityDetailsLoading] = useState(false);
 
   // Reindirizza alla landing page se non autenticato e carica dati se autenticato
   useEffect(() => {
@@ -87,6 +97,25 @@ export default function AnalyticsDashboard() {
       </div>
     );
   }
+
+  const loadCityDetails = async (cityName: string) => {
+    setCityDetailsLoading(true);
+    try {
+      const response = await fetch(`/api/analytics/city-details?city=${encodeURIComponent(cityName)}&timeframe=${selectedTimeframe}`);
+      if (response.ok) {
+        const result = await response.json();
+        setCityDetails(result.data);
+      } else {
+        console.error('Error loading city details:', await response.text());
+        setCityDetails(null);
+      }
+    } catch (error) {
+      console.error('Error loading city details:', error);
+      setCityDetails(null);
+    } finally {
+      setCityDetailsLoading(false);
+    }
+  };
 
   const loadAnalyticsData = async () => {
     setLoading(true);
@@ -559,7 +588,14 @@ export default function AnalyticsDashboard() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {analyticsData.geographical.map((city, index) => (
-                <div key={index} className="p-4 border rounded-lg hover:shadow-md transition-shadow">
+                <div 
+                  key={index} 
+                  className="p-4 border rounded-lg hover:shadow-md transition-shadow cursor-pointer hover:border-green-500"
+                  onClick={() => {
+                    setSelectedCity(city.city);
+                    loadCityDetails(city.city);
+                  }}
+                >
                   <div className="flex items-center justify-between mb-3">
                     <h4 className="font-semibold text-gray-900">{city.city}</h4>
                     <Badge variant={city.fraudRate > 15 ? 'destructive' : city.fraudRate > 10 ? 'default' : 'secondary'}>
@@ -577,6 +613,10 @@ export default function AnalyticsDashboard() {
                         {city.riskScore.toFixed(1)}
                       </span>
                     </div>
+                  </div>
+                  <div className="mt-3 text-xs text-green-600 flex items-center">
+                    <Eye className="h-3 w-3 mr-1" />
+                    Clicca per dettagli
                   </div>
                 </div>
               ))}
@@ -606,6 +646,113 @@ export default function AnalyticsDashboard() {
             </div>
           </Card>
         )}
+        
+        {/* City Details Modal */}
+        <Dialog open={!!selectedCity} onOpenChange={(open) => !open && setSelectedCity(null)}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center text-xl">
+                <MapPin className="h-5 w-5 mr-2 text-green-600" />
+                Dettagli per {selectedCity}
+              </DialogTitle>
+              <DialogDescription>
+                Analisi dettagliata dei sinistri e delle frodi per la città di {selectedCity}
+              </DialogDescription>
+            </DialogHeader>
+            
+            {cityDetailsLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+                <span className="ml-3 text-gray-600">Caricamento dettagli...</span>
+              </div>
+            ) : cityDetails ? (
+              <div className="space-y-6">
+                {/* Overview Stats */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <div className="text-2xl font-bold text-blue-600">{cityDetails.totalClaims}</div>
+                    <div className="text-sm text-blue-800">Sinistri Totali</div>
+                  </div>
+                  <div className="bg-red-50 p-4 rounded-lg">
+                    <div className="text-2xl font-bold text-red-600">{cityDetails.fraudRate.toFixed(1)}%</div>
+                    <div className="text-sm text-red-800">Tasso Frodi</div>
+                  </div>
+                  <div className="bg-yellow-50 p-4 rounded-lg">
+                    <div className="text-2xl font-bold text-yellow-600">{cityDetails.avgRiskScore.toFixed(1)}</div>
+                    <div className="text-sm text-yellow-800">Rischio Medio</div>
+                  </div>
+                  <div className="bg-green-50 p-4 rounded-lg">
+                    <div className="text-2xl font-bold text-green-600">€{cityDetails.totalAmount.toLocaleString()}</div>
+                    <div className="text-sm text-green-800">Importo Totale</div>
+                  </div>
+                </div>
+
+                {/* Claims by Type */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-4">Sinistri per Tipo</h4>
+                    <div className="space-y-3">
+                      {cityDetails.claimsByType?.map((item: any, index: number) => (
+                        <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                          <span className="font-medium text-gray-700">{item.type}</span>
+                          <div className="flex items-center space-x-3">
+                            <span className="text-gray-600">{item.count} sinistri</span>
+                            <Badge variant="secondary">{(item.percentage * 100).toFixed(1)}%</Badge>
+                          </div>
+                        </div>
+                      )) || <p className="text-gray-500">Nessun dato disponibile</p>}
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-4">Rischio per Categoria</h4>
+                    <div className="space-y-3">
+                      {cityDetails.riskByCategory?.map((item: any, index: number) => (
+                        <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                          <span className="font-medium text-gray-700">{item.category}</span>
+                          <div className="flex items-center space-x-3">
+                            <span className={`font-medium ${getRiskColor(item.avgScore)}`}>
+                              {item.avgScore.toFixed(1)}
+                            </span>
+                            <Badge variant={item.avgScore > 70 ? 'destructive' : item.avgScore > 40 ? 'default' : 'secondary'}>
+                              {item.count}
+                            </Badge>
+                          </div>
+                        </div>
+                      )) || <p className="text-gray-500">Nessun dato disponibile</p>}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Recent Claims */}
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-4">Sinistri Recenti</h4>
+                  <div className="space-y-3">
+                    {cityDetails.recentClaims?.slice(0, 5).map((claim: any, index: number) => (
+                      <div key={index} className="flex justify-between items-center p-4 border rounded-lg">
+                        <div className="flex-1">
+                          <div className="font-medium text-gray-900">{claim.claimType}</div>
+                          <div className="text-sm text-gray-600">{new Date(claim.incidentDate).toLocaleDateString('it-IT')}</div>
+                        </div>
+                        <div className="text-right">
+                          <div className="font-medium">€{parseFloat(claim.claimedAmount).toLocaleString()}</div>
+                          <Badge variant={claim.priorityLevel === 'HIGH' ? 'destructive' : claim.priorityLevel === 'MEDIUM' ? 'default' : 'secondary'} className="mt-1">
+                            {claim.priorityLevel}
+                          </Badge>
+                        </div>
+                      </div>
+                    )) || <p className="text-gray-500">Nessun dato disponibile</p>}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <AlertTriangle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-500">Impossibile caricare i dettagli per questa città</p>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </main>
     </div>
   );
