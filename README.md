@@ -11,7 +11,11 @@ A complete agentic coding boilerplate with authentication, PostgreSQL database, 
 - **⚡ Modern Stack**: Next.js 15, React 19, TypeScript
 - **📱 Responsive**: Mobile-first design approach
 
+## ☕ Buy Me a Coffee
 
+If you find this project helpful and would like to support my work, consider buying me a coffee! Your support helps me maintain and improve this boilerplate.
+
+[Buy Me a Coffee](https://paypal.me/rosmoscato)
 
 ## 📋 Prerequisites
 

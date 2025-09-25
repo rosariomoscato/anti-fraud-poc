@@ -5,7 +5,7 @@ export function SiteFooter() {
       <div className="container mx-auto px-4">
         <div className="flex flex-col items-center space-y-3">
           <a
-            href="https://gitea.rosmoscato.xyz/ros/agentic-coding-starter-kit"
+            href="https://gitea.rosmoscato.xyz/ros/nextjs-boilerplate"
             target="_blank"
             rel="noopener noreferrer"
             className="text-primary hover:underline"
