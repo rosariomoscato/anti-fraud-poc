@@ -1,9 +1,43 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
 import { UserProfile } from "@/components/auth/user-profile";
 import { ModeToggle } from "./ui/mode-toggle";
-import { Shield, BarChart3, Search, Database } from "lucide-react";
+import { Button } from "./ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
+import { Shield, BarChart3, Search, Database, Menu } from "lucide-react";
 
 export function SiteHeader() {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const navigationItems = [
+    {
+      href: "/",
+      icon: BarChart3,
+      label: "Dashboard",
+    },
+    {
+      href: "/analytics",
+      icon: BarChart3,
+      label: "Analytics",
+    },
+    {
+      href: "/synthetic-data",
+      icon: Database,
+      label: "Dati Sintetici",
+    },
+    {
+      href: "/investigations",
+      icon: Search,
+      label: "Indagini",
+    },
+  ];
   return (
     <header className="border-b bg-white">
       <div className="container mx-auto px-4 py-3">
@@ -22,36 +56,44 @@ export function SiteHeader() {
               </div>
             </Link>
             
+            {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center space-x-6 ml-10">
-              <Link
-                href="/"
-                className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors"
-              >
-                <BarChart3 className="h-4 w-4" />
-                <span className="text-sm font-medium">Dashboard</span>
-              </Link>
-              <Link
-                href="/analytics"
-                className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors"
-              >
-                <BarChart3 className="h-4 w-4" />
-                <span className="text-sm font-medium">Analytics</span>
-              </Link>
-              <Link
-                href="/synthetic-data"
-                className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors"
-              >
-                <Database className="h-4 w-4" />
-                <span className="text-sm font-medium">Dati Sintetici</span>
-              </Link>
-              <Link
-                href="/investigations"
-                className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors"
-              >
-                <Search className="h-4 w-4" />
-                <span className="text-sm font-medium">Indagini</span>
-              </Link>
+              {navigationItems.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors"
+                >
+                  <item.icon className="h-4 w-4" />
+                  <span className="text-sm font-medium">{item.label}</span>
+                </Link>
+              ))}
             </nav>
+
+            {/* Mobile Menu Button */}
+            <div className="md:hidden">
+              <DropdownMenu open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm">
+                    <Menu className="h-5 w-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  {navigationItems.map((item) => (
+                    <DropdownMenuItem key={item.href} asChild>
+                      <Link 
+                        href={item.href}
+                        className="flex items-center space-x-2"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        <item.icon className="h-4 w-4" />
+                        <span>{item.label}</span>
+                      </Link>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
           
           <div className="flex items-center gap-4">
