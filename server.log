@@ -1,0 +1,23 @@
+
+> agentic-coding-boilerplate@0.1.0 dev
+> next dev --turbopack
+
+   ▲ Next.js 15.4.6 (Turbopack)
+   - Local:        http://localhost:3000
+   - Network:      http://192.168.1.64:3000
+   - Environments: .env
+
+ ✓ Starting...
+ ✓ Ready in 751ms
+ ○ Compiling /api/analytics/stats ...
+ ✓ Compiled /api/analytics/stats in 635ms
+Generating 24 months starting from 2025-09-25T20:36:51.633Z
+Month 1: Ott '23 (key: 2023-Ott) -> claims: 7, fraud: 3
+Month 2: Nov '23 (key: 2023-Nov) -> claims: 10, fraud: 5
+Month 3: Dic '23 (key: 2023-Dic) -> claims: 2, fraud: 0
+Month 22: Lug '25 (key: 2025-Lug) -> claims: 2, fraud: 1
+Month 23: Ago '25 (key: 2025-Ago) -> claims: 6, fraud: 4
+Month 24: Set '25 (key: 2025-Set) -> claims: 1, fraud: 1
+Total months generated: 24
+ GET /api/analytics/stats?timeframe=all 200 in 1005ms
+[?25h
