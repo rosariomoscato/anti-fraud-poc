@@ -69,7 +69,7 @@ function getRiskCategory(score: number): string {
   return 'Alto Rischio';
 }
 
-function calculateRiskScore(priorityLevel: string): number {
+function calculateRiskScore(priorityLevel: string | null): number {
   switch (priorityLevel) {
     case 'HIGH': return 85;
     case 'URGENT': return 95;
@@ -175,7 +175,7 @@ export async function GET(request: NextRequest) {
       claimType: getTypeLabel(claim.claimType),
       incidentDate: claim.incidentDate,
       claimedAmount: claim.claimedAmount,
-      priorityLevel: claim.priorityLevel
+      priorityLevel: claim.priorityLevel || 'UNKNOWN'
     }));
 
     const cityDetails: CityDetails = {

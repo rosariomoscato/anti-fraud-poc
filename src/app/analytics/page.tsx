@@ -33,7 +33,11 @@ import {
   RefreshCw,
   MapPin,
   Users,
-  Shield
+  Shield,
+  FileText,
+  AlertCircle,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -70,6 +74,21 @@ export default function AnalyticsDashboard() {
   const [cityDetails, setCityDetails] = useState<any>(null);
   const [cityDetailsLoading, setCityDetailsLoading] = useState(false);
   const [showDetailedMap, setShowDetailedMap] = useState(false);
+  
+  // Case Explorer state
+  const [cases, setCases] = useState<any[]>([]);
+  const [casesLoading, setCasesLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [filterType, setFilterType] = useState<string>('all');
+  const [filterRisk, setFilterRisk] = useState<string>('all');
+  const [selectedCase, setSelectedCase] = useState<any>(null);
+  const [caseDetails, setCaseDetails] = useState<any>(null);
+  const [caseDetailsLoading, setCaseDetailsLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalCases, setTotalCases] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [casesLimit] = useState(10);
 
   // Reindirizza alla landing page se non autenticato e carica dati se autenticato
   useEffect(() => {
@@ -79,6 +98,20 @@ export default function AnalyticsDashboard() {
       loadAnalyticsData();
     }
   }, [session, isPending, router, selectedTimeframe]);
+
+  // Reset pagination when filters change
+  useEffect(() => {
+    if (session && activeTab === 'cases') {
+      resetPagination();
+    }
+  }, [searchTerm, filterStatus, filterType, filterRisk, selectedTimeframe]);
+
+  // Load cases when cases tab is active, filters change, or page changes
+  useEffect(() => {
+    if (session && activeTab === 'cases') {
+      loadCases();
+    }
+  }, [session, activeTab, selectedTimeframe, searchTerm, filterStatus, filterType, filterRisk, currentPage]);
 
   if (isPending) {
     return (
@@ -99,6 +132,49 @@ export default function AnalyticsDashboard() {
     );
   }
 
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const resetPagination = () => {
+    setCurrentPage(1);
+  };
+
+  const loadCases = async () => {
+    setCasesLoading(true);
+    try {
+      const params = new URLSearchParams({
+        timeframe: selectedTimeframe,
+        search: searchTerm,
+        status: filterStatus,
+        type: filterType,
+        risk: filterRisk,
+        page: currentPage.toString(),
+        limit: casesLimit.toString()
+      });
+      
+      const response = await fetch(`/api/analytics/cases?${params}`);
+      if (response.ok) {
+        const result = await response.json();
+        setCases(result.data?.cases || []);
+        setTotalCases(result.data?.pagination?.total || 0);
+        setTotalPages(result.data?.pagination?.totalPages || 0);
+      } else {
+        console.error('Error loading cases:', await response.text());
+        setCases([]);
+        setTotalCases(0);
+        setTotalPages(0);
+      }
+    } catch (error) {
+      console.error('Error loading cases:', error);
+      setCases([]);
+      setTotalCases(0);
+      setTotalPages(0);
+    } finally {
+      setCasesLoading(false);
+    }
+  };
+
   const loadCityDetails = async (cityName: string) => {
     setCityDetailsLoading(true);
     try {
@@ -115,6 +191,26 @@ export default function AnalyticsDashboard() {
       setCityDetails(null);
     } finally {
       setCityDetailsLoading(false);
+    }
+  };
+
+  const loadCaseDetails = async (caseId: string) => {
+    setCaseDetailsLoading(true);
+    try {
+      const response = await fetch(`/api/analytics/case-details?id=${encodeURIComponent(caseId)}`);
+      if (response.ok) {
+        const result = await response.json();
+        setCaseDetails(result.data);
+        setSelectedCase(caseId);
+      } else {
+        console.error('Error loading case details:', await response.text());
+        setCaseDetails(null);
+      }
+    } catch (error) {
+      console.error('Error loading case details:', error);
+      setCaseDetails(null);
+    } finally {
+      setCaseDetailsLoading(false);
     }
   };
 
@@ -170,6 +266,68 @@ export default function AnalyticsDashboard() {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Helper functions for Case Explorer
+  const getTimeframeLabel = (timeframe: string) => {
+    switch (timeframe) {
+      case '7d': return 'Ultimi 7 giorni';
+      case '30d': return 'Ultimi 30 giorni';
+      case '90d': return 'Ultimi 90 giorni';
+      case '1y': return 'Ultimo anno';
+      case 'all': return 'Tutti i dati';
+      default: return timeframe;
+    }
+  };
+
+  const getTypeLabel = (type: string): string => {
+    const typeLabels: Record<string, string> = {
+      'COLLISION': 'Collisione',
+      'THEFT': 'Furto',
+      'VANDALISM': 'Vandalismo',
+      'NATURAL_DISASTER': 'Evento Naturale',
+      'OTHER': 'Altro'
+    };
+    return typeLabels[type] || type;
+  };
+
+  const getStatusLabel = (status: string): string => {
+    const statusLabels: Record<string, string> = {
+      'SUBMITTED': 'Inviato',
+      'UNDER_REVIEW': 'In Revisione',
+      'APPROVED': 'Approvato',
+      'REJECTED': 'Respinto',
+      'UNDER_INVESTIGATION': 'Sotto Indagine'
+    };
+    return statusLabels[status] || status;
+  };
+
+  const getStatusVariant = (status: string): "default" | "secondary" | "destructive" | "outline" => {
+    switch (status) {
+      case 'SUBMITTED': return 'default';
+      case 'UNDER_REVIEW': return 'outline';
+      case 'APPROVED': return 'secondary';
+      case 'REJECTED': return 'destructive';
+      case 'UNDER_INVESTIGATION': return 'destructive';
+      default: return 'default';
+    }
+  };
+
+  const getRiskScore = (priorityLevel: string): number => {
+    switch (priorityLevel) {
+      case 'URGENT': return 95;
+      case 'HIGH': return 85;
+      case 'MEDIUM': return 55;
+      case 'LOW': return 25;
+      default: return 50;
+    }
+  };
+
+  const getRiskVariant = (priorityLevel: string): "default" | "secondary" | "destructive" | "outline" => {
+    const score = getRiskScore(priorityLevel);
+    if (score > 70) return 'destructive';
+    if (score > 40) return 'outline';
+    return 'secondary';
   };
 
   const formatCurrency = (amount: number) => {
@@ -630,21 +788,230 @@ export default function AnalyticsDashboard() {
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-semibold text-gray-900">Case Explorer</h3>
               <div className="flex items-center space-x-2">
-                <Button variant="outline" size="sm">
-                  <Filter className="h-4 w-4 mr-2" />
-                  Filtri
-                </Button>
-                <Button variant="outline" size="sm">
-                  <Search className="h-4 w-4 mr-2" />
-                  Cerca
+                <Button variant="outline" size="sm" onClick={loadCases}>
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Aggiorna
                 </Button>
               </div>
             </div>
-            <div className="text-center py-12">
-              <Eye className="h-12 w-12 text-gray-400 mx-auto mb-2" />
-              <p className="text-gray-500">Case Explorer</p>
-              <p className="text-sm text-gray-400">Ricerca avanzata e filtri multi-dimensionali per singoli sinistri</p>
+            
+            {/* Search and Filters */}
+            <div className="mb-6 space-y-4">
+              {/* Search Bar */}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <input
+                  type="text"
+                  placeholder="Cerca per città, tipo sinistro, ID claim..."
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+              
+              {/* Filter Row */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Stato</label>
+                  <select 
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    value={filterStatus}
+                    onChange={(e) => setFilterStatus(e.target.value)}
+                  >
+                    <option value="all">Tutti gli stati</option>
+                    <option value="SUBMITTED">Inviato</option>
+                    <option value="UNDER_REVIEW">In Revisione</option>
+                    <option value="APPROVED">Approvato</option>
+                    <option value="REJECTED">Respinto</option>
+                    <option value="UNDER_INVESTIGATION">Sotto Indagine</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Tipo Sinistro</label>
+                  <select 
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    value={filterType}
+                    onChange={(e) => setFilterType(e.target.value)}
+                  >
+                    <option value="all">Tutti i tipi</option>
+                    <option value="COLLISION">Collisione</option>
+                    <option value="THEFT">Furto</option>
+                    <option value="VANDALISM">Vandalismo</option>
+                    <option value="NATURAL_DISASTER">Evento Naturale</option>
+                    <option value="OTHER">Altro</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Livello Rischio</label>
+                  <select 
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    value={filterRisk}
+                    onChange={(e) => setFilterRisk(e.target.value)}
+                  >
+                    <option value="all">Tutti i livelli</option>
+                    <option value="LOW">Basso Rischio</option>
+                    <option value="MEDIUM">Medio Rischio</option>
+                    <option value="HIGH">Alto Rischio</option>
+                    <option value="URGENT">Urgente</option>
+                  </select>
+                </div>
+              </div>
             </div>
+            
+            {/* Results Summary */}
+            <div className="mb-4 flex items-center justify-between">
+              <div className="text-sm text-gray-600">
+                Trovati {totalCases} sinistri
+                {selectedTimeframe !== 'all' && ` • Periodo: ${getTimeframeLabel(selectedTimeframe)}`}
+              </div>
+              {(searchTerm || filterStatus !== 'all' || filterType !== 'all' || filterRisk !== 'all') && (
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => {
+                    setSearchTerm('');
+                    setFilterStatus('all');
+                    setFilterType('all');
+                    setFilterRisk('all');
+                  }}
+                >
+                  <Filter className="h-4 w-4 mr-2" />
+                  Cancella Filtri
+                </Button>
+              )}
+            </div>
+            
+            {/* Cases Table */}
+            {casesLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+                <span className="ml-3 text-gray-600">Caricamento sinistri...</span>
+              </div>
+            ) : cases.length === 0 ? (
+              <div className="text-center py-12">
+                <Search className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-500">Nessun sinistro trovato</p>
+                <p className="text-sm text-gray-400">Prova a modificare i filtri o il periodo di ricerca</p>
+              </div>
+            ) : (
+              <>
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Città</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Importo</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stato</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rischio</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Azioni</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {cases.map((case_item, index) => (
+                        <tr key={case_item.id} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                            {case_item.claimNumber || case_item.id.substring(0, 8)}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {new Date(case_item.incidentDate).toLocaleDateString('it-IT')}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {case_item.incidentCity}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {getTypeLabel(case_item.claimType)}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            €{parseFloat(case_item.claimedAmount).toLocaleString()}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <Badge variant={getStatusVariant(case_item.claimStatus)}>
+                              {getStatusLabel(case_item.claimStatus)}
+                            </Badge>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <Badge variant={getRiskVariant(case_item.priorityLevel)}>
+                              {getRiskScore(case_item.priorityLevel)}/100
+                            </Badge>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => {
+                                loadCaseDetails(case_item.id);
+                              }}
+                            >
+                              <Eye className="h-4 w-4 mr-1" />
+                              Dettagli
+                            </Button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                
+                {/* Pagination Controls */}
+                {totalCases > casesLimit && (
+                  <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200">
+                    <div className="flex items-center text-sm text-gray-700">
+                      <span>
+                        Pagina {currentPage} di {totalPages}
+                      </span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handlePageChange(currentPage - 1)}
+                        disabled={currentPage <= 1}
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                      </Button>
+                      <div className="flex items-center space-x-1">
+                        {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                          let page;
+                          if (totalPages <= 5) {
+                            page = i + 1;
+                          } else if (currentPage <= 3) {
+                            page = i + 1;
+                          } else if (currentPage >= totalPages - 2) {
+                            page = totalPages - 4 + i;
+                          } else {
+                            page = currentPage - 2 + i;
+                          }
+                          return (
+                            <Button
+                              key={page}
+                              variant={currentPage === page ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => handlePageChange(page)}
+                              className="w-8 h-8"
+                            >
+                              {page}
+                            </Button>
+                          );
+                        })}
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handlePageChange(currentPage + 1)}
+                        disabled={currentPage >= totalPages}
+                      >
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
           </Card>
         )}
         
@@ -750,6 +1117,197 @@ export default function AnalyticsDashboard() {
               <div className="text-center py-12">
                 <AlertTriangle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                 <p className="text-gray-500">Impossibile caricare i dettagli per questa città</p>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Case Details Modal */}
+        <Dialog open={!!selectedCase} onOpenChange={(open) => !open && setSelectedCase(null)}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center text-xl">
+                <FileText className="h-5 w-5 mr-2 text-blue-600" />
+                Dettagli Sinistro {caseDetails?.claimNumber}
+              </DialogTitle>
+              <DialogDescription>
+                Informazioni dettagliate sul sinistro selezionato
+              </DialogDescription>
+            </DialogHeader>
+            
+            {caseDetailsLoading ? (
+              <div className="flex items-center justify-center h-64">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              </div>
+            ) : caseDetails ? (
+              <div className="space-y-6">
+                {/* Informazioni Principali */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h3 className="font-semibold text-gray-700 mb-2">Informazioni Sinistro</h3>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Numero Sinistro:</span>
+                        <span className="font-medium">{caseDetails.claimNumber}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Numero Polizza:</span>
+                        <span className="font-medium">{caseDetails.policyNumber}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Tipo Sinistro:</span>
+                        <span className="font-medium">{getTypeLabel(caseDetails.claimType)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Stato:</span>
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          caseDetails.claimStatus === 'APPROVED' ? 'bg-green-100 text-green-800' :
+                          caseDetails.claimStatus === 'REJECTED' ? 'bg-red-100 text-red-800' :
+                          caseDetails.claimStatus === 'UNDER_INVESTIGATION' ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-gray-100 text-gray-800'
+                        }`}>
+                          {caseDetails.claimStatus}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Priorità:</span>
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          caseDetails.priorityLevel === 'URGENT' ? 'bg-red-100 text-red-800' :
+                          caseDetails.priorityLevel === 'HIGH' ? 'bg-orange-100 text-orange-800' :
+                          caseDetails.priorityLevel === 'MEDIUM' ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-green-100 text-green-800'
+                        }`}>
+                          {caseDetails.priorityLevel}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Data Incidente:</span>
+                        <span className="font-medium">
+                          {new Date(caseDetails.incidentDate).toLocaleDateString('it-IT')} {caseDetails.incidentTime}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Luogo:</span>
+                        <span className="font-medium">{caseDetails.incidentLocation}, {caseDetails.incidentCity}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h3 className="font-semibold text-gray-700 mb-2">Informazioni Richiedente</h3>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Nome:</span>
+                        <span className="font-medium">{caseDetails.claimantName}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Codice Fiscale:</span>
+                        <span className="font-medium">{caseDetails.claimantId}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Email:</span>
+                        <span className="font-medium">{caseDetails.claimantEmail}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Telefono:</span>
+                        <span className="font-medium">{caseDetails.claimantPhone}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Informazioni Veicolo */}
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h3 className="font-semibold text-gray-700 mb-2">Informazioni Veicolo</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Marca:</span>
+                      <span className="font-medium">{caseDetails.vehicleMake}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Modello:</span>
+                      <span className="font-medium">{caseDetails.vehicleModel}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Anno:</span>
+                      <span className="font-medium">{caseDetails.vehicleYear}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Targa:</span>
+                      <span className="font-medium">{caseDetails.vehicleLicensePlate}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Telaio:</span>
+                      <span className="font-medium">{caseDetails.vehicleVin}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Informazioni Finanziarie */}
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h3 className="font-semibold text-gray-700 mb-2">Informazioni Finanziarie</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Importo Richiesto:</span>
+                      <span className="font-medium">€{caseDetails.claimedAmount.toLocaleString('it-IT')}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Danno Stimato:</span>
+                      <span className="font-medium">€{caseDetails.estimatedDamage.toLocaleString('it-IT')}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Analisi Rischio */}
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h3 className="font-semibold text-gray-700 mb-2">Analisi Rischio</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="text-sm">
+                      <div className="flex justify-between mb-2">
+                        <span className="text-gray-600">Punteggio Rischio:</span>
+                        <span className={`font-bold ${
+                          caseDetails.riskScore >= 70 ? 'text-red-600' :
+                          caseDetails.riskScore >= 40 ? 'text-yellow-600' :
+                          'text-green-600'
+                        }`}>
+                          {caseDetails.riskScore}/100
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Categoria:</span>
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          caseDetails.riskCategory === 'Alto Rischio' ? 'bg-red-100 text-red-800' :
+                          caseDetails.riskCategory === 'Medio Rischio' ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-green-100 text-green-800'
+                        }`}>
+                          {caseDetails.riskCategory}
+                        </span>
+                      </div>
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-700 mb-2">Indicatori Rilevati:</h4>
+                      <div className="space-y-1">
+                        {caseDetails.fraudIndicators.map((indicator: any, index: number) => (
+                          <div key={index} className="flex items-center justify-between text-xs bg-white p-2 rounded">
+                            <span className="text-gray-600">{indicator.description}</span>
+                            <span className="text-red-600 font-medium">+{indicator.riskImpact}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Descrizione */}
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h3 className="font-semibold text-gray-700 mb-2">Descrizione Incidente</h3>
+                  <p className="text-sm text-gray-600">{caseDetails.claimDescription}</p>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <AlertCircle className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                <p className="text-gray-500">Nessun dettaglio disponibile</p>
               </div>
             )}
           </DialogContent>
