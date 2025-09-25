@@ -16,9 +16,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Agentic Coding Boilerplate",
+  title: "Anti-Fraud System | Rilevamento Frodi Assicurative",
   description:
-    "Complete agentic coding boilerplate with authentication, database, AI integration, and modern tooling - perfect for building AI-powered applications and autonomous agents by Leon van Zyl",
+    "Sistema avanzato di rilevamento frodi per sinistri automobilistici con intelligenza artificiale, machine learning e analytics dashboard per investigatori assicurativi.",
 };
 
 export default function RootLayout({

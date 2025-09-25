@@ -1,0 +1,685 @@
+import { db } from './db';
+import { 
+  insuranceClaim, 
+  riskAssessment, 
+  fraudDetection, 
+  investigation, 
+  fraudPattern,
+  analyticsMetric,
+  dataImport,
+  dataExport,
+  systemAudit,
+  InsuranceClaim,
+  NewInsuranceClaim,
+  RiskAssessment,
+  NewRiskAssessment,
+  FraudDetection,
+  NewFraudDetection,
+  Investigation,
+  NewInvestigation,
+  FraudPattern,
+  NewFraudPattern,
+  AnalyticsMetric,
+  NewAnalyticsMetric,
+  DataImport,
+  NewDataImport,
+  DataExport,
+  NewDataExport,
+  SystemAudit,
+  NewSystemAudit
+} from './schema';
+import { eq, and, gte, lte, desc, asc, sql, ilike, or } from 'drizzle-orm';
+import { v4 as uuidv4 } from 'uuid';
+
+// Utility functions for generating UUIDs
+export function generateId(): string {
+  return uuidv4();
+}
+
+// Insurance Claims Operations
+export const claimsDb = {
+  create: async (data: Omit<NewInsuranceClaim, 'id'>): Promise<InsuranceClaim> => {
+    const claim: NewInsuranceClaim = {
+      ...data,
+      id: generateId()
+    };
+    const [result] = await db.insert(insuranceClaim).values(claim).returning();
+    return result;
+  },
+
+  findById: async (id: string): Promise<InsuranceClaim | null> => {
+    const [result] = await db.select().from(insuranceClaim).where(eq(insuranceClaim.id, id));
+    return result || null;
+  },
+
+  findByClaimNumber: async (claimNumber: string): Promise<InsuranceClaim | null> => {
+    const [result] = await db.select().from(insuranceClaim).where(eq(insuranceClaim.claimNumber, claimNumber));
+    return result || null;
+  },
+
+  findAll: async (filters?: {
+    status?: string;
+    claimType?: string;
+    city?: string;
+    dateFrom?: Date;
+    dateTo?: Date;
+    claimantId?: string;
+    limit?: number;
+    offset?: number;
+  }): Promise<InsuranceClaim[]> => {
+    let query = db.select().from(insuranceClaim);
+    
+    if (filters) {
+      const conditions = [];
+      
+      if (filters.status) {
+        conditions.push(eq(insuranceClaim.claimStatus, filters.status));
+      }
+      
+      if (filters.claimType) {
+        conditions.push(eq(insuranceClaim.claimType, filters.claimType));
+      }
+      
+      if (filters.city) {
+        conditions.push(ilike(insuranceClaim.incidentCity, `%${filters.city}%`));
+      }
+      
+      if (filters.dateFrom) {
+        conditions.push(gte(insuranceClaim.incidentDate, filters.dateFrom));
+      }
+      
+      if (filters.dateTo) {
+        conditions.push(lte(insuranceClaim.incidentDate, filters.dateTo));
+      }
+      
+      if (filters.claimantId) {
+        conditions.push(eq(insuranceClaim.claimantId, filters.claimantId));
+      }
+      
+      if (conditions.length > 0) {
+        query = query.where(and(...conditions));
+      }
+    }
+    
+    query = query.orderBy(desc(insuranceClaim.createdAt));
+    
+    if (filters?.limit) {
+      query = query.limit(filters.limit);
+    }
+    
+    if (filters?.offset) {
+      query = query.offset(filters.offset);
+    }
+    
+    return query;
+  },
+
+  update: async (id: string, data: Partial<NewInsuranceClaim>): Promise<InsuranceClaim | null> => {
+    const [result] = await db
+      .update(insuranceClaim)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(insuranceClaim.id, id))
+      .returning();
+    return result || null;
+  },
+
+  delete: async (id: string): Promise<boolean> => {
+    const result = await db.delete(insuranceClaim).where(eq(insuranceClaim.id, id));
+    return result.count > 0;
+  },
+
+  count: async (filters?: {
+    status?: string;
+    claimType?: string;
+    city?: string;
+    dateFrom?: Date;
+    dateTo?: Date;
+  }): Promise<number> => {
+    let query = db.select({ count: sql<number>`count(*)` }).from(insuranceClaim);
+    
+    if (filters) {
+      const conditions = [];
+      
+      if (filters.status) {
+        conditions.push(eq(insuranceClaim.claimStatus, filters.status));
+      }
+      
+      if (filters.claimType) {
+        conditions.push(eq(insuranceClaim.claimType, filters.claimType));
+      }
+      
+      if (filters.city) {
+        conditions.push(ilike(insuranceClaim.incidentCity, `%${filters.city}%`));
+      }
+      
+      if (filters.dateFrom) {
+        conditions.push(gte(insuranceClaim.incidentDate, filters.dateFrom));
+      }
+      
+      if (filters.dateTo) {
+        conditions.push(lte(insuranceClaim.incidentDate, filters.dateTo));
+      }
+      
+      if (conditions.length > 0) {
+        query = query.where(and(...conditions));
+      }
+    }
+    
+    const [result] = await query;
+    return result.count;
+  }
+};
+
+// Risk Assessment Operations
+export const riskAssessmentsDb = {
+  create: async (data: Omit<NewRiskAssessment, 'id'>): Promise<RiskAssessment> => {
+    const assessment: NewRiskAssessment = {
+      ...data,
+      id: generateId()
+    };
+    const [result] = await db.insert(riskAssessment).values(assessment).returning();
+    return result;
+  },
+
+  findByClaimId: async (claimId: string): Promise<RiskAssessment | null> => {
+    const [result] = await db
+      .select()
+      .from(riskAssessment)
+      .where(eq(riskAssessment.claimId, claimId));
+    return result || null;
+  },
+
+  findAll: async (filters?: {
+    riskCategory?: string;
+    status?: string;
+    minScore?: number;
+    maxScore?: number;
+    limit?: number;
+    offset?: number;
+  }): Promise<RiskAssessment[]> => {
+    let query = db.select().from(riskAssessment);
+    
+    if (filters) {
+      const conditions = [];
+      
+      if (filters.riskCategory) {
+        conditions.push(eq(riskAssessment.riskCategory, filters.riskCategory));
+      }
+      
+      if (filters.status) {
+        conditions.push(eq(riskAssessment.assessmentStatus, filters.status));
+      }
+      
+      if (filters.minScore) {
+        conditions.push(gte(riskAssessment.overallRiskScore, filters.minScore));
+      }
+      
+      if (filters.maxScore) {
+        conditions.push(lte(riskAssessment.overallRiskScore, filters.maxScore));
+      }
+      
+      if (conditions.length > 0) {
+        query = query.where(and(...conditions));
+      }
+    }
+    
+    query = query.orderBy(desc(riskAssessment.assessedAt));
+    
+    if (filters?.limit) {
+      query = query.limit(filters.limit);
+    }
+    
+    if (filters?.offset) {
+      query = query.offset(filters.offset);
+    }
+    
+    return query;
+  },
+
+  update: async (id: string, data: Partial<NewRiskAssessment>): Promise<RiskAssessment | null> => {
+    const [result] = await db
+      .update(riskAssessment)
+      .set(data)
+      .where(eq(riskAssessment.id, id))
+      .returning();
+    return result || null;
+  }
+};
+
+// Fraud Detection Operations
+export const fraudDetectionsDb = {
+  create: async (data: Omit<NewFraudDetection, 'id'>): Promise<FraudDetection> => {
+    const detection: NewFraudDetection = {
+      ...data,
+      id: generateId()
+    };
+    const [result] = await db.insert(fraudDetection).values(detection).returning();
+    return result;
+  },
+
+  findByClaimId: async (claimId: string): Promise<FraudDetection[]> => {
+    return db
+      .select()
+      .from(fraudDetection)
+      .where(eq(fraudDetection.claimId, claimId))
+      .orderBy(desc(fraudDetection.detectedAt));
+  },
+
+  findAll: async (filters?: {
+    status?: string;
+    detectionType?: string;
+    minConfidence?: number;
+    isEscalated?: boolean;
+    limit?: number;
+    offset?: number;
+  }): Promise<FraudDetection[]> => {
+    let query = db.select().from(fraudDetection);
+    
+    if (filters) {
+      const conditions = [];
+      
+      if (filters.status) {
+        conditions.push(eq(fraudDetection.detectionStatus, filters.status));
+      }
+      
+      if (filters.detectionType) {
+        conditions.push(eq(fraudDetection.detectionType, filters.detectionType));
+      }
+      
+      if (filters.minConfidence) {
+        conditions.push(gte(fraudDetection.confidenceScore, filters.minConfidence));
+      }
+      
+      if (filters.isEscalated !== undefined) {
+        conditions.push(eq(fraudDetection.isEscalated, filters.isEscalated));
+      }
+      
+      if (conditions.length > 0) {
+        query = query.where(and(...conditions));
+      }
+    }
+    
+    query = query.orderBy(desc(fraudDetection.detectedAt));
+    
+    if (filters?.limit) {
+      query = query.limit(filters.limit);
+    }
+    
+    if (filters?.offset) {
+      query = query.offset(filters.offset);
+    }
+    
+    return query;
+  },
+
+  update: async (id: string, data: Partial<NewFraudDetection>): Promise<FraudDetection | null> => {
+    const [result] = await db
+      .update(fraudDetection)
+      .set(data)
+      .where(eq(fraudDetection.id, id))
+      .returning();
+    return result || null;
+  }
+};
+
+// Investigation Operations
+export const investigationsDb = {
+  create: async (data: Omit<NewInvestigation, 'id'>): Promise<Investigation> => {
+    const investigation: NewInvestigation = {
+      ...data,
+      id: generateId()
+    };
+    const [result] = await db.insert(investigation).values(investigation).returning();
+    return result;
+  },
+
+  findByClaimId: async (claimId: string): Promise<Investigation | null> => {
+    const [result] = await db
+      .select()
+      .from(investigation)
+      .where(eq(investigation.claimId, claimId));
+    return result || null;
+  },
+
+  findAll: async (filters?: {
+    status?: string;
+    priority?: string;
+    investigatorId?: string;
+    limit?: number;
+    offset?: number;
+  }): Promise<Investigation[]> => {
+    let query = db.select().from(investigation);
+    
+    if (filters) {
+      const conditions = [];
+      
+      if (filters.status) {
+        conditions.push(eq(investigation.investigationStatus, filters.status));
+      }
+      
+      if (filters.priority) {
+        conditions.push(eq(investigation.priority, filters.priority));
+      }
+      
+      if (filters.investigatorId) {
+        conditions.push(eq(investigation.investigatorId, filters.investigatorId));
+      }
+      
+      if (conditions.length > 0) {
+        query = query.where(and(...conditions));
+      }
+    }
+    
+    query = query.orderBy(desc(investigation.createdAt));
+    
+    if (filters?.limit) {
+      query = query.limit(filters.limit);
+    }
+    
+    if (filters?.offset) {
+      query = query.offset(filters.offset);
+    }
+    
+    return query;
+  },
+
+  update: async (id: string, data: Partial<NewInvestigation>): Promise<Investigation | null> => {
+    const [result] = await db
+      .update(investigation)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(investigation.id, id))
+      .returning();
+    return result || null;
+  }
+};
+
+// Fraud Pattern Operations
+export const fraudPatternsDb = {
+  create: async (data: Omit<NewFraudPattern, 'id'>): Promise<FraudPattern> => {
+    const pattern: NewFraudPattern = {
+      ...data,
+      id: generateId()
+    };
+    const [result] = await db.insert(fraudPattern).values(pattern).returning();
+    return result;
+  },
+
+  findById: async (id: string): Promise<FraudPattern | null> => {
+    const [result] = await db.select().from(fraudPattern).where(eq(fraudPattern.id, id));
+    return result || null;
+  },
+
+  findAll: async (filters?: {
+    isActive?: boolean;
+    patternType?: string;
+    severityLevel?: string;
+    limit?: number;
+    offset?: number;
+  }): Promise<FraudPattern[]> => {
+    let query = db.select().from(fraudPattern);
+    
+    if (filters) {
+      const conditions = [];
+      
+      if (filters.isActive !== undefined) {
+        conditions.push(eq(fraudPattern.isActive, filters.isActive));
+      }
+      
+      if (filters.patternType) {
+        conditions.push(eq(fraudPattern.patternType, filters.patternType));
+      }
+      
+      if (filters.severityLevel) {
+        conditions.push(eq(fraudPattern.severityLevel, filters.severityLevel));
+      }
+      
+      if (conditions.length > 0) {
+        query = query.where(and(...conditions));
+      }
+    }
+    
+    query = query.orderBy(asc(fraudPattern.patternName));
+    
+    if (filters?.limit) {
+      query = query.limit(filters.limit);
+    }
+    
+    if (filters?.offset) {
+      query = query.offset(filters.offset);
+    }
+    
+    return query;
+  },
+
+  update: async (id: string, data: Partial<NewFraudPattern>): Promise<FraudPattern | null> => {
+    const [result] = await db
+      .update(fraudPattern)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(fraudPattern.id, id))
+      .returning();
+    return result || null;
+  }
+};
+
+// Analytics Operations
+export const analyticsDb = {
+  createMetric: async (data: Omit<NewAnalyticsMetric, 'id'>): Promise<AnalyticsMetric> => {
+    const metric: NewAnalyticsMetric = {
+      ...data,
+      id: generateId()
+    };
+    const [result] = await db.insert(analyticsMetric).values(metric).returning();
+    return result;
+  },
+
+  findMetricsByCategory: async (category: string, periodStart?: Date, periodEnd?: Date): Promise<AnalyticsMetric[]> => {
+    let query = db
+      .select()
+      .from(analyticsMetric)
+      .where(eq(analyticsMetric.metricCategory, category));
+    
+    if (periodStart) {
+      query = query.where(gte(analyticsMetric.periodStart, periodStart));
+    }
+    
+    if (periodEnd) {
+      query = query.where(lte(analyticsMetric.periodEnd, periodEnd));
+    }
+    
+    return query.orderBy(desc(analyticsMetric.periodStart));
+  },
+
+  updateMetric: async (id: string, data: Partial<NewAnalyticsMetric>): Promise<AnalyticsMetric | null> => {
+    const [result] = await db
+      .update(analyticsMetric)
+      .set({ ...data, lastUpdated: new Date() })
+      .where(eq(analyticsMetric.id, id))
+      .returning();
+    return result || null;
+  }
+};
+
+// Data Import/Export Operations
+export const dataImportsDb = {
+  create: async (data: Omit<NewDataImport, 'id'>): Promise<DataImport> => {
+    const importRecord: NewDataImport = {
+      ...data,
+      id: generateId()
+    };
+    const [result] = await db.insert(dataImport).values(importRecord).returning();
+    return result;
+  },
+
+  findById: async (id: string): Promise<DataImport | null> => {
+    const [result] = await db.select().from(dataImport).where(eq(dataImport.id, id));
+    return result || null;
+  },
+
+  findAll: async (filters?: {
+    status?: string;
+    fileType?: string;
+    limit?: number;
+    offset?: number;
+  }): Promise<DataImport[]> => {
+    let query = db.select().from(dataImport);
+    
+    if (filters) {
+      const conditions = [];
+      
+      if (filters.status) {
+        conditions.push(eq(dataImport.importStatus, filters.status));
+      }
+      
+      if (filters.fileType) {
+        conditions.push(eq(dataImport.fileType, filters.fileType));
+      }
+      
+      if (conditions.length > 0) {
+        query = query.where(and(...conditions));
+      }
+    }
+    
+    query = query.orderBy(desc(dataImport.importedAt));
+    
+    if (filters?.limit) {
+      query = query.limit(filters.limit);
+    }
+    
+    if (filters?.offset) {
+      query = query.offset(filters.offset);
+    }
+    
+    return query;
+  },
+
+  update: async (id: string, data: Partial<NewDataImport>): Promise<DataImport | null> => {
+    const [result] = await db
+      .update(dataImport)
+      .set(data)
+      .where(eq(dataImport.id, id))
+      .returning();
+    return result || null;
+  }
+};
+
+export const dataExportsDb = {
+  create: async (data: Omit<NewDataExport, 'id'>): Promise<DataExport> => {
+    const exportRecord: NewDataExport = {
+      ...data,
+      id: generateId()
+    };
+    const [result] = await db.insert(dataExport).values(exportRecord).returning();
+    return result;
+  },
+
+  findById: async (id: string): Promise<DataExport | null> => {
+    const [result] = await db.select().from(dataExport).where(eq(dataExport.id, id));
+    return result || null;
+  },
+
+  findAll: async (filters?: {
+    status?: string;
+    fileType?: string;
+    limit?: number;
+    offset?: number;
+  }): Promise<DataExport[]> => {
+    let query = db.select().from(dataExport);
+    
+    if (filters) {
+      const conditions = [];
+      
+      if (filters.status) {
+        conditions.push(eq(dataExport.exportStatus, filters.status));
+      }
+      
+      if (filters.fileType) {
+        conditions.push(eq(dataExport.fileType, filters.fileType));
+      }
+      
+      if (conditions.length > 0) {
+        query = query.where(and(...conditions));
+      }
+    }
+    
+    query = query.orderBy(desc(dataExport.createdAt));
+    
+    if (filters?.limit) {
+      query = query.limit(filters.limit);
+    }
+    
+    if (filters?.offset) {
+      query = query.offset(filters.offset);
+    }
+    
+    return query;
+  },
+
+  update: async (id: string, data: Partial<NewDataExport>): Promise<DataExport | null> => {
+    const [result] = await db
+      .update(dataExport)
+      .set(data)
+      .where(eq(dataExport.id, id))
+      .returning();
+    return result || null;
+  }
+};
+
+// Audit Operations
+export const auditDb = {
+  create: async (data: Omit<NewSystemAudit, 'id' | 'createdAt'>): Promise<SystemAudit> => {
+    const audit: NewSystemAudit = {
+      ...data,
+      id: generateId(),
+      createdAt: new Date()
+    };
+    const [result] = await db.insert(systemAudit).values(audit).returning();
+    return result;
+  },
+
+  findAll: async (filters?: {
+    action?: string;
+    entityType?: string;
+    userId?: string;
+    entityId?: string;
+    limit?: number;
+    offset?: number;
+  }): Promise<SystemAudit[]> => {
+    let query = db.select().from(systemAudit);
+    
+    if (filters) {
+      const conditions = [];
+      
+      if (filters.action) {
+        conditions.push(eq(systemAudit.action, filters.action));
+      }
+      
+      if (filters.entityType) {
+        conditions.push(eq(systemAudit.entityType, filters.entityType));
+      }
+      
+      if (filters.userId) {
+        conditions.push(eq(systemAudit.userId, filters.userId));
+      }
+      
+      if (filters.entityId) {
+        conditions.push(eq(systemAudit.entityId, filters.entityId));
+      }
+      
+      if (conditions.length > 0) {
+        query = query.where(and(...conditions));
+      }
+    }
+    
+    query = query.orderBy(desc(systemAudit.createdAt));
+    
+    if (filters?.limit) {
+      query = query.limit(filters.limit);
+    }
+    
+    if (filters?.offset) {
+      query = query.offset(filters.offset);
+    }
+    
+    return query;
+  }
+};
