@@ -249,7 +249,11 @@ export function generateSyntheticClaim(fraudPercentage: number = 15): SyntheticC
   const birthDate = randomDate(new Date('1950-01-01'), new Date('2005-12-31'));
   const claimantId = generateFiscalCode(firstName, lastName, birthDate);
   
-  const incidentDate = randomDate(new Date('2023-01-01'), new Date('2024-12-31'));
+  // Generate date within the last 2 years from today
+  const endDate = new Date();
+  const startDate = new Date();
+  startDate.setFullYear(startDate.getFullYear() - 2);
+  const incidentDate = randomDate(startDate, endDate);
   const incidentTime = randomTime();
   const incidentHour = parseInt(incidentTime.split(':')[0]);
   

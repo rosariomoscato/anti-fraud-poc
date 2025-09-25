@@ -6,6 +6,16 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  Legend, 
+  ResponsiveContainer,
+  Area,
+  AreaChart
+} from "recharts";
+import { 
   BarChart3, 
   TrendingUp, 
   AlertTriangle, 
@@ -47,7 +57,7 @@ export default function AnalyticsDashboard() {
   
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [selectedTimeframe, setSelectedTimeframe] = useState<'7d' | '30d' | '90d' | '1y'>('30d');
+  const [selectedTimeframe, setSelectedTimeframe] = useState<'7d' | '30d' | '90d' | '1y' | 'all'>('all');
   const [activeTab, setActiveTab] = useState<'overview' | 'cases' | 'patterns' | 'geographic'>('overview');
 
   // Reindirizza alla landing page se non autenticato e carica dati se autenticato
@@ -80,52 +90,56 @@ export default function AnalyticsDashboard() {
 
   const loadAnalyticsData = async () => {
     setLoading(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
     
-    const mockData: AnalyticsData = {
-      kpis: {
-        totalClaims: 1247,
-        fraudDetectionRate: 12.8,
-        avgRiskScore: 42.3,
-        investigationEfficiency: 87.5,
-        costSavings: 2850000
-      },
-      trends: {
-        claimsByMonth: [
-          { month: 'Gen', claims: 145, fraud: 18 },
-          { month: 'Feb', claims: 132, fraud: 15 },
-          { month: 'Mar', claims: 158, fraud: 22 },
-          { month: 'Apr', claims: 167, fraud: 19 },
-          { month: 'Mag', claims: 189, fraud: 28 },
-          { month: 'Giu', claims: 176, fraud: 21 },
-          { month: 'Lug', claims: 198, fraud: 25 }
-        ],
-        riskDistribution: [
-          { category: 'Basso Rischio', count: 756, percentage: 60.6 },
-          { category: 'Medio Rischio', count: 321, percentage: 25.7 },
-          { category: 'Alto Rischio', count: 170, percentage: 13.7 }
-        ],
-        topFraudPatterns: [
-          { pattern: 'Orari notturni', count: 89, trend: 'up' },
-          { pattern: 'Importi elevati', count: 67, trend: 'stable' },
-          { pattern: 'Aree ad alto rischio', count: 54, trend: 'up' },
-          { pattern: 'Veicoli di lusso', count: 43, trend: 'down' },
-          { pattern: 'Storico frodi', count: 38, trend: 'stable' }
-        ]
-      },
-      geographical: [
-        { city: 'Roma', claims: 234, fraudRate: 15.2, riskScore: 48.5 },
-        { city: 'Milano', claims: 198, fraudRate: 12.1, riskScore: 41.2 },
-        { city: 'Napoli', claims: 167, fraudRate: 18.7, riskScore: 56.8 },
-        { city: 'Torino', claims: 145, fraudRate: 9.8, riskScore: 35.4 },
-        { city: 'Palermo', claims: 134, fraudRate: 22.4, riskScore: 62.1 },
-        { city: 'Bologna', claims: 98, fraudRate: 11.2, riskScore: 39.7 }
-      ]
-    };
-    
-    setAnalyticsData(mockData);
-    setLoading(false);
+    try {
+      // Add cache busting parameter to ensure fresh data
+      const timestamp = new Date().getTime();
+      const response = await fetch(`/api/analytics/stats?timeframe=${selectedTimeframe}&_t=${timestamp}`);
+      
+      if (response.ok) {
+        const result = await response.json();
+        console.log('Analytics data loaded:', result.data.trends.claimsByMonth.length, 'months');
+        setAnalyticsData(result.data);
+      } else {
+        console.error('Error loading analytics data:', await response.text());
+        // Fallback to empty data structure
+        setAnalyticsData({
+          kpis: {
+            totalClaims: 0,
+            fraudDetectionRate: 0,
+            avgRiskScore: 0,
+            investigationEfficiency: 0,
+            costSavings: 0
+          },
+          trends: {
+            claimsByMonth: [],
+            riskDistribution: [],
+            topFraudPatterns: []
+          },
+          geographical: []
+        });
+      }
+    } catch (error) {
+      console.error('Error loading analytics data:', error);
+      // Fallback to empty data structure
+      setAnalyticsData({
+        kpis: {
+          totalClaims: 0,
+          fraudDetectionRate: 0,
+          avgRiskScore: 0,
+          investigationEfficiency: 0,
+          costSavings: 0
+        },
+        trends: {
+          claimsByMonth: [],
+          riskDistribution: [],
+          topFraudPatterns: []
+        },
+        geographical: []
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const formatCurrency = (amount: number) => {
@@ -154,10 +168,73 @@ export default function AnalyticsDashboard() {
     return 'text-red-600';
   };
 
-  if (loading || !analyticsData) {
+  if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  // Check if there's no data
+  if (!analyticsData || analyticsData.kpis.totalClaims === 0) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        {/* Header - same as before */}
+        <header className="bg-white border-b border-gray-200">
+          <div className="container mx-auto px-4 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-green-600">
+                  <BarChart3 className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold text-gray-900">Advanced Analytics</h1>
+                  <p className="text-sm text-gray-600">Analisi avanzata del sistema anti-frode</p>
+                </div>
+              </div>
+              <div className="flex items-center space-x-4">
+                <div className="flex bg-gray-100 rounded-lg p-1">
+                  {(['7d', '30d', '90d', '1y', 'all'] as const).map((timeframe) => (
+                    <button
+                      key={timeframe}
+                      onClick={() => setSelectedTimeframe(timeframe)}
+                      className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
+                        selectedTimeframe === timeframe
+                          ? 'bg-white text-gray-900 shadow-sm'
+                          : 'text-gray-600 hover:text-gray-900'
+                      }`}
+                    >
+                      {timeframe === '7d' ? '7 giorni' : 
+                       timeframe === '30d' ? '30 giorni' : 
+                       timeframe === '90d' ? '90 giorni' : 
+                       timeframe === '1y' ? '1 anno' : 'Tutti'}
+                    </button>
+                  ))}
+                </div>
+                <Button variant="outline" size="sm" onClick={loadAnalyticsData}>
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Aggiorna
+                </Button>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* No Data Message */}
+        <div className="container mx-auto px-4 py-16">
+          <div className="text-center">
+            <BarChart3 className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">Nessun Dato Disponibile</h2>
+            <p className="text-gray-600 mb-6">
+              Non ci sono sinistri nel database per il periodo selezionato. 
+              Genera alcuni dati sintetici per vedere le analytics.
+            </p>
+            <Button onClick={() => router.push('/synthetic-data')}>
+              Vai a Generatore Dati
+            </Button>
+          </div>
+        </div>
       </div>
     );
   }
@@ -173,13 +250,13 @@ export default function AnalyticsDashboard() {
                 <BarChart3 className="h-6 w-6 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Analytics Dashboard</h1>
+                <h1 className="text-2xl font-bold text-gray-900">Advanced Analytics</h1>
                 <p className="text-sm text-gray-600">Analisi avanzata del sistema anti-frode</p>
               </div>
             </div>
             <div className="flex items-center space-x-4">
               <div className="flex bg-gray-100 rounded-lg p-1">
-                {(['7d', '30d', '90d', '1y'] as const).map((timeframe) => (
+                {(['7d', '30d', '90d', '1y', 'all'] as const).map((timeframe) => (
                   <button
                     key={timeframe}
                     onClick={() => setSelectedTimeframe(timeframe)}
@@ -191,7 +268,8 @@ export default function AnalyticsDashboard() {
                   >
                     {timeframe === '7d' ? '7 giorni' : 
                      timeframe === '30d' ? '30 giorni' : 
-                     timeframe === '90d' ? '90 giorni' : '1 anno'}
+                     timeframe === '90d' ? '90 giorni' : 
+                     timeframe === '1y' ? '1 anno' : 'Tutti'}
                   </button>
                 ))}
               </div>
@@ -328,13 +406,78 @@ export default function AnalyticsDashboard() {
             <Card className="p-6">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-lg font-semibold text-gray-900">Trend Sinistri</h3>
-                <Badge variant="outline">Ultimi 7 mesi</Badge>
+                <Badge variant="outline">
+                  {selectedTimeframe === '7d' ? 'Ultimo mese' :
+                   selectedTimeframe === '30d' ? 'Ultimi 2 mesi' :
+                   selectedTimeframe === '90d' ? 'Ultimi 4 mesi' :
+                   selectedTimeframe === '1y' ? 'Ultimo anno' : 'Ultimi 2 anni'}
+                </Badge>
               </div>
-              <div className="h-64 bg-gray-100 rounded-lg flex items-center justify-center">
-                <div className="text-center">
-                  <BarChart3 className="h-12 w-12 text-gray-400 mx-auto mb-2" />
-                  <p className="text-gray-500">Grafico Andamento Temporale</p>
-                  <p className="text-sm text-gray-400">Visualizzazione trend sinistri vs frodi</p>
+              <div className="h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={analyticsData.trends.claimsByMonth}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis 
+                      dataKey="month" 
+                      tick={{ fontSize: 9 }}
+                      tickLine={false}
+                      interval={selectedTimeframe === 'all' ? 1 : 0}
+                      angle={-45}
+                      textAnchor="end"
+                      height={60}
+                    />
+                    <YAxis 
+                      tick={{ fontSize: 12 }}
+                      tickLine={false}
+                    />
+                    <Tooltip 
+                      contentStyle={{
+                        backgroundColor: 'white',
+                        border: '1px solid #e5e7eb',
+                        borderRadius: '6px',
+                        fontSize: '12px'
+                      }}
+                    />
+                    <Legend />
+                    <Area 
+                      type="monotone" 
+                      dataKey="claims" 
+                      stackId="1"
+                      stroke="#3b82f6" 
+                      fill="#3b82f6" 
+                      fillOpacity={0.6}
+                      name="Sinistri Totali"
+                      connectNulls={false}
+                    />
+                    <Area 
+                      type="monotone" 
+                      dataKey="fraud" 
+                      stackId="2"
+                      stroke="#ef4444" 
+                      fill="#ef4444" 
+                      fillOpacity={0.6}
+                      name="Casi Sospetti"
+                      connectNulls={false}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+                <div className="text-xs text-gray-500 mt-2">
+                  Mostrati {analyticsData.trends.claimsByMonth.length} mesi | 
+                  <span className="ml-2">Dati totali: {analyticsData.trends.claimsByMonth.reduce((sum, item) => sum + item.claims, 0)} sinistri</span>
+                </div>
+              </div>
+              
+              {/* Debug table - show all raw data */}
+              <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                <h4 className="text-sm font-medium text-gray-700 mb-2">Dati grezzi di debug ({analyticsData.trends.claimsByMonth.length} mesi):</h4>
+                <div className="grid grid-cols-6 md:grid-cols-12 lg:grid-cols-24 gap-1 text-xs">
+                  {analyticsData.trends.claimsByMonth.map((item, index) => (
+                    <div key={index} className="bg-white p-1 rounded border text-center min-w-[40px]">
+                      <div className="font-medium text-xs">{item.month}</div>
+                      <div className="text-blue-600 text-xs">{item.claims}</div>
+                      <div className="text-red-600 text-xs">{item.fraud}</div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </Card>
