@@ -69,6 +69,7 @@ export default function AnalyticsDashboard() {
   const [selectedCity, setSelectedCity] = useState<string | null>(null);
   const [cityDetails, setCityDetails] = useState<any>(null);
   const [cityDetailsLoading, setCityDetailsLoading] = useState(false);
+  const [showDetailedMap, setShowDetailedMap] = useState(false);
 
   // Reindirizza alla landing page se non autenticato e carica dati se autenticato
   useEffect(() => {
@@ -581,7 +582,7 @@ export default function AnalyticsDashboard() {
           <Card className="p-6">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-semibold text-gray-900">Analisi Geografica</h3>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={() => setShowDetailedMap(true)}>
                 <MapPin className="h-4 w-4 mr-2" />
                 Mappa Dettagliata
               </Button>
@@ -751,6 +752,190 @@ export default function AnalyticsDashboard() {
                 <p className="text-gray-500">Impossibile caricare i dettagli per questa città</p>
               </div>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Detailed Map Modal */}
+        <Dialog open={showDetailedMap} onOpenChange={(open) => !open && setShowDetailedMap(false)}>
+          <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center text-xl">
+                <MapPin className="h-5 w-5 mr-2 text-green-600" />
+                Mappa Dettagliata - Analisi Geografica
+              </DialogTitle>
+              <DialogDescription>
+                Visualizzazione interattiva dei dati di frode per città italiana
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-6">
+              {/* Italy SVG Map with City Markers */}
+              <div className="bg-blue-50 p-6 rounded-lg">
+                <h4 className="font-semibold text-gray-900 mb-4">Mappa delle Città - Analisi Frodi</h4>
+                
+                {/* Simplified Italy Map SVG */}
+                <div className="relative w-full h-96 bg-white rounded-lg border">
+                  <svg viewBox="0 0 800 600" className="w-full h-full">
+                    {/* Simplified Italy outline */}
+                    <path 
+                      d="M400 100 L450 120 L480 150 L490 200 L485 250 L480 300 L470 350 L450 400 L420 450 L380 480 L340 490 L300 485 L280 460 L270 420 L275 380 L290 340 L310 300 L330 260 L350 220 L370 180 L390 140 Z" 
+                      fill="#f0f9ff" 
+                      stroke="#3b82f6" 
+                      strokeWidth="2"
+                    />
+                    
+                    {/* City markers based on actual data */}
+                    {analyticsData.geographical.map((city, index) => {
+                      // Simplified coordinates for major Italian cities
+                      const cityCoords: Record<string, { x: number; y: number }> = {
+                        'Roma': { x: 400, y: 350 },
+                        'Milano': { x: 300, y: 200 },
+                        'Napoli': { x: 420, y: 450 },
+                        'Torino': { x: 280, y: 150 },
+                        'Palermo': { x: 320, y: 520 },
+                        'Genova': { x: 250, y: 280 },
+                        'Bologna': { x: 350, y: 280 },
+                        'Firenze': { x: 350, y: 320 },
+                        'Bari': { x: 480, y: 400 },
+                        'Catania': { x: 380, y: 550 },
+                        'Venezia': { x: 380, y: 200 },
+                        'Verona': { x: 360, y: 220 },
+                        'Messina': { x: 420, y: 530 },
+                        'Padova': { x: 370, y: 210 },
+                        'Trieste': { x: 420, y: 180 },
+                        'Taranto': { x: 460, y: 460 },
+                        'Brescia': { x: 320, y: 210 },
+                        'Parma': { x: 330, y: 260 },
+                        'Prato': { x: 340, y: 320 },
+                        'Modena': { x: 340, y: 270 }
+                      };
+                      
+                      const coords = cityCoords[city.city] || { x: 350, y: 300 };
+                      const riskColor = city.riskScore > 70 ? '#ef4444' : city.riskScore > 40 ? '#f59e0b' : '#10b981';
+                      const size = Math.max(8, Math.min(20, city.claims / 2));
+                      
+                      return (
+                        <g key={city.city}>
+                          {/* City marker */}
+                          <circle 
+                            cx={coords.x} 
+                            cy={coords.y} 
+                            r={size} 
+                            fill={riskColor}
+                            fillOpacity={0.7}
+                            stroke="white"
+                            strokeWidth="2"
+                            className="cursor-pointer hover:opacity-100 transition-opacity"
+                            onClick={() => {
+                              setSelectedCity(city.city);
+                              loadCityDetails(city.city);
+                              setShowDetailedMap(false);
+                            }}
+                          />
+                          
+                          {/* City label */}
+                          <text 
+                            x={coords.x} 
+                            y={coords.y + size + 15} 
+                            textAnchor="middle" 
+                            fontSize="10" 
+                            fill="#374151"
+                            fontWeight="bold"
+                            className="pointer-events-none"
+                          >
+                            {city.city}
+                          </text>
+                          
+                          {/* Risk score label */}
+                          <text 
+                            x={coords.x} 
+                            y={coords.y + size + 27} 
+                            textAnchor="middle" 
+                            fontSize="8" 
+                            fill={riskColor}
+                            fontWeight="bold"
+                            className="pointer-events-none"
+                          >
+                            {city.riskScore.toFixed(0)}
+                          </text>
+                        </g>
+                      );
+                    })}
+                  </svg>
+                </div>
+                
+                {/* Legend */}
+                <div className="flex justify-center mt-4 space-x-6">
+                  <div className="flex items-center">
+                    <div className="w-4 h-4 bg-green-500 rounded-full mr-2"></div>
+                    <span className="text-sm">Basso Rischio (0-40)</span>
+                  </div>
+                  <div className="flex items-center">
+                    <div className="w-4 h-4 bg-yellow-500 rounded-full mr-2"></div>
+                    <span className="text-sm">Medio Rischio (41-70)</span>
+                  </div>
+                  <div className="flex items-center">
+                    <div className="w-4 h-4 bg-red-500 rounded-full mr-2"></div>
+                    <span className="text-sm">Alto Rischio (71-100)</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* City Statistics Summary */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-red-50 p-4 rounded-lg">
+                  <div className="text-2xl font-bold text-red-600">
+                    {analyticsData.geographical.filter(c => c.riskScore > 70).length}
+                  </div>
+                  <div className="text-sm text-red-800">Città ad Alto Rischio</div>
+                </div>
+                <div className="bg-yellow-50 p-4 rounded-lg">
+                  <div className="text-2xl font-bold text-yellow-600">
+                    {analyticsData.geographical.filter(c => c.riskScore > 40 && c.riskScore <= 70).length}
+                  </div>
+                  <div className="text-sm text-yellow-800">Città a Medio Rischio</div>
+                </div>
+                <div className="bg-green-50 p-4 rounded-lg">
+                  <div className="text-2xl font-bold text-green-600">
+                    {analyticsData.geographical.filter(c => c.riskScore <= 40).length}
+                  </div>
+                  <div className="text-sm text-green-800">Città a Basso Rischio</div>
+                </div>
+              </div>
+
+              {/* City Rankings */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-4">Top Città per Sinistri</h4>
+                  <div className="space-y-2">
+                    {analyticsData.geographical
+                      .sort((a, b) => b.claims - a.claims)
+                      .slice(0, 5)
+                      .map((city, index) => (
+                        <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                          <span className="font-medium">{city.city}</span>
+                          <span className="text-blue-600 font-bold">{city.claims}</span>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+                
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-4">Top Città per Tasso Frodi</h4>
+                  <div className="space-y-2">
+                    {analyticsData.geographical
+                      .sort((a, b) => b.fraudRate - a.fraudRate)
+                      .slice(0, 5)
+                      .map((city, index) => (
+                        <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                          <span className="font-medium">{city.city}</span>
+                          <span className="text-red-600 font-bold">{city.fraudRate.toFixed(1)}%</span>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              </div>
+            </div>
           </DialogContent>
         </Dialog>
       </main>
