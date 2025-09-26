@@ -11,7 +11,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { Shield, BarChart3, Search, Database, Menu } from "lucide-react";
+import { Shield, BarChart3, Search, Database, Menu, Info } from "lucide-react";
 
 export function SiteHeader() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -36,6 +36,11 @@ export function SiteHeader() {
       href: "/investigations",
       icon: Search,
       label: "Indagini",
+    },
+    {
+      href: "/info",
+      icon: Info,
+      label: "Info",
     },
   ];
   return (
