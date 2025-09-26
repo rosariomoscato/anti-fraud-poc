@@ -38,7 +38,8 @@ import {
   AlertCircle,
   ChevronLeft,
   ChevronRight,
-  TrendingDown
+  TrendingDown,
+  X
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -95,6 +96,19 @@ export default function AnalyticsDashboard() {
   const [fraudYearOverYearChange, setFraudYearOverYearChange] = useState(0);
   const [efficiencyYearOverYearChange, setEfficiencyYearOverYearChange] = useState(0);
   const [costSavingsYearOverYearChange, setCostSavingsYearOverYearChange] = useState(0);
+  
+  // Pattern Analysis Filters
+  const [showPatternFilter, setShowPatternFilter] = useState(false);
+  const [patternFilters, setPatternFilters] = useState({
+    trend: 'all', // 'all', 'up', 'down', 'stable'
+    minCount: 0,
+    selectedPatterns: [] as string[]
+  });
+  const [filteredPatterns, setFilteredPatterns] = useState<Array<{
+  pattern: string;
+  count: number;
+  trend: 'up' | 'down' | 'stable';
+}>>([]);
 
   // Reindirizza alla landing page se non autenticato e carica dati se autenticato
   useEffect(() => {
@@ -118,6 +132,50 @@ export default function AnalyticsDashboard() {
       loadCases();
     }
   }, [session, activeTab, selectedTimeframe, searchTerm, filterStatus, filterType, filterRisk, currentPage]);
+
+  // Apply filters to fraud patterns
+  const applyPatternFilters = (patterns: Array<{
+    pattern: string;
+    count: number;
+    trend: 'up' | 'down' | 'stable';
+  }>) => {
+    return patterns.filter(pattern => {
+      // Filter by trend
+      if (patternFilters.trend !== 'all' && pattern.trend !== patternFilters.trend) {
+        return false;
+      }
+      
+      // Filter by minimum count
+      if (pattern.count < patternFilters.minCount) {
+        return false;
+      }
+      
+      // Filter by selected patterns
+      if (patternFilters.selectedPatterns.length > 0 && 
+          !patternFilters.selectedPatterns.includes(pattern.pattern)) {
+        return false;
+      }
+      
+      return true;
+    });
+  };
+
+  // Update filtered patterns when analytics data or filters change
+  useEffect(() => {
+    if (analyticsData?.trends?.topFraudPatterns) {
+      const filtered = applyPatternFilters(analyticsData.trends.topFraudPatterns);
+      setFilteredPatterns(filtered);
+    }
+  }, [analyticsData, patternFilters]);
+
+  // Reset pattern filters
+  const resetPatternFilters = () => {
+    setPatternFilters({
+      trend: 'all',
+      minCount: 0,
+      selectedPatterns: []
+    });
+  };
 
   if (isPending) {
     return (
@@ -350,6 +408,7 @@ export default function AnalyticsDashboard() {
     }).format(amount);
   };
 
+  
   const getTrendIcon = (trend: 'up' | 'down' | 'stable') => {
     switch (trend) {
       case 'up':
@@ -712,30 +771,113 @@ export default function AnalyticsDashboard() {
           <Card className="p-6">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-semibold text-gray-900">Pattern di Frode Principali</h3>
-              <Button variant="outline" size="sm">
-                <Filter className="h-4 w-4 mr-2" />
-                Filtra
-              </Button>
+              <div className="flex items-center space-x-2">
+                <Button variant="outline" size="sm" onClick={() => setShowPatternFilter(!showPatternFilter)}>
+                  <Filter className="h-4 w-4 mr-2" />
+                  Filtra
+                </Button>
+                {(patternFilters.trend !== 'all' || patternFilters.minCount > 0 || patternFilters.selectedPatterns.length > 0) && (
+                  <Button variant="ghost" size="sm" onClick={resetPatternFilters}>
+                    <X className="h-4 w-4 mr-1" />
+                    Reset
+                  </Button>
+                )}
+              </div>
             </div>
-            <div className="space-y-4">
-              {analyticsData.trends.topFraudPatterns.map((pattern, index) => (
-                <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                  <div className="flex items-center space-x-4">
-                    <div className="text-lg font-semibold text-gray-500">#{index + 1}</div>
-                    <div>
-                      <h4 className="font-medium text-gray-900">{pattern.pattern}</h4>
-                      <p className="text-sm text-gray-600">{pattern.count} casi rilevati</p>
+
+            {/* Filter Panel */}
+            {showPatternFilter && (
+              <Card className="p-4 mb-6 bg-gray-50">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Trend</label>
+                    <select 
+                      value={patternFilters.trend}
+                      onChange={(e) => setPatternFilters({...patternFilters, trend: e.target.value})}
+                      className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="all">Tutti i trend</option>
+                      <option value="up">In aumento</option>
+                      <option value="down">In diminuzione</option>
+                      <option value="stable">Stabile</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Numero minimo casi</label>
+                    <input 
+                      type="number"
+                      min="0"
+                      value={patternFilters.minCount}
+                      onChange={(e) => setPatternFilters({...patternFilters, minCount: parseInt(e.target.value) || 0})}
+                      className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="Minimo casi"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Seleziona pattern</label>
+                    <div className="space-y-2">
+                      {['Orari notturni', 'Importi elevati', 'Furto veicolo', 'Aree ad alto rischio'].map((pattern) => (
+                        <label key={pattern} className="flex items-center space-x-2">
+                          <input
+                            type="checkbox"
+                            checked={patternFilters.selectedPatterns.includes(pattern)}
+                            onChange={(e) => {
+                              const selected = e.target.checked
+                                ? [...patternFilters.selectedPatterns, pattern]
+                                : patternFilters.selectedPatterns.filter(p => p !== pattern);
+                              setPatternFilters({...patternFilters, selectedPatterns: selected});
+                            }}
+                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          />
+                          <span className="text-sm text-gray-700">{pattern}</span>
+                        </label>
+                      ))}
                     </div>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    {getTrendIcon(pattern.trend)}
-                    <Badge variant={pattern.trend === 'up' ? 'destructive' : pattern.trend === 'down' ? 'default' : 'secondary'}>
-                      {pattern.trend === 'up' ? 'In aumento' : pattern.trend === 'down' ? 'In diminuzione' : 'Stabile'}
-                    </Badge>
-                  </div>
                 </div>
-              ))}
-            </div>
+                
+                <div className="mt-4 flex justify-between items-center">
+                  <span className="text-sm text-gray-600">
+                    {filteredPatterns.length} pattern trovati
+                  </span>
+                  <Button variant="outline" size="sm" onClick={() => setShowPatternFilter(false)}>
+                    Chiudi
+                  </Button>
+                </div>
+              </Card>
+            )}
+            {filteredPatterns.length === 0 && (patternFilters.trend !== 'all' || patternFilters.minCount > 0 || patternFilters.selectedPatterns.length > 0) ? (
+              <div className="text-center py-8">
+                <AlertCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">Nessun pattern trovato</h3>
+                <p className="text-gray-600 mb-4">Prova a modificare i criteri di filtro per vedere più risultati.</p>
+                <Button variant="outline" onClick={resetPatternFilters}>
+                  Resetta filtri
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {(filteredPatterns.length > 0 ? filteredPatterns : analyticsData.trends.topFraudPatterns).map((pattern, index) => (
+                  <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div className="flex items-center space-x-4">
+                      <div className="text-lg font-semibold text-gray-500">#{index + 1}</div>
+                      <div>
+                        <h4 className="font-medium text-gray-900">{pattern.pattern}</h4>
+                        <p className="text-sm text-gray-600">{pattern.count} casi rilevati</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      {getTrendIcon(pattern.trend)}
+                      <Badge variant={pattern.trend === 'up' ? 'destructive' : pattern.trend === 'down' ? 'default' : 'secondary'}>
+                        {pattern.trend === 'up' ? 'In aumento' : pattern.trend === 'down' ? 'In diminuzione' : 'Stabile'}
+                      </Badge>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </Card>
         )}
 
