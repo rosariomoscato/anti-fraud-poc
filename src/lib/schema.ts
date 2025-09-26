@@ -304,6 +304,37 @@ export const systemAudit = pgTable("system_audit", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
+// Admin and User Management Tables
+
+export const userRole = pgTable("user_role", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+  role: text("role").notNull().default("user"), // user, admin, investigator
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  createdBy: text("created_by").references(() => user.id),
+});
+
+export const adminSettings = pgTable("admin_settings", {
+  id: text("id").primaryKey(),
+  settingKey: text("setting_key").notNull().unique(),
+  settingValue: json("setting_value").notNull(),
+  description: text("description"),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  updatedBy: text("updated_by").references(() => user.id),
+});
+
+export const adminAudit = pgTable("admin_audit", {
+  id: text("id").primaryKey(),
+  adminId: text("admin_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+  action: text("action").notNull(),
+  entityType: text("entity_type").notNull(),
+  entityId: text("entity_id"),
+  details: json("details"),
+  ipAddress: text("ip_address"),
+  userAgent: text("user_agent"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
 // Type definitions for better TypeScript support
 export type InsuranceClaim = typeof insuranceClaim.$inferSelect;
 export type NewInsuranceClaim = typeof insuranceClaim.$inferInsert;
@@ -323,3 +354,9 @@ export type AnalyticsMetric = typeof analyticsMetric.$inferSelect;
 export type NewAnalyticsMetric = typeof analyticsMetric.$inferInsert;
 export type SystemAudit = typeof systemAudit.$inferSelect;
 export type NewSystemAudit = typeof systemAudit.$inferInsert;
+export type UserRole = typeof userRole.$inferSelect;
+export type NewUserRole = typeof userRole.$inferInsert;
+export type AdminSettings = typeof adminSettings.$inferSelect;
+export type NewAdminSettings = typeof adminSettings.$inferInsert;
+export type AdminAudit = typeof adminAudit.$inferSelect;
+export type NewAdminAudit = typeof adminAudit.$inferInsert;

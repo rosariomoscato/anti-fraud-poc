@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useSession } from "@/lib/auth-client";
 import { UserProfile } from "@/components/auth/user-profile";
 import { ModeToggle } from "./ui/mode-toggle";
 import { Button } from "./ui/button";
@@ -11,10 +12,31 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { Shield, BarChart3, Search, Database, Menu, Info } from "lucide-react";
+import { Shield, BarChart3, Search, Database, Menu, Info, Settings } from "lucide-react";
 
 export function SiteHeader() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isAdminUser, setIsAdminUser] = useState(false);
+  const { data: session } = useSession();
+
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      if (session?.user?.id) {
+        try {
+          const response = await fetch('/api/auth/is-admin');
+          const data = await response.json();
+          setIsAdminUser(data.isAdmin);
+        } catch (error) {
+          console.error('Error checking admin status:', error);
+          setIsAdminUser(false);
+        }
+      } else {
+        setIsAdminUser(false);
+      }
+    };
+
+    checkAdminStatus();
+  }, [session]);
 
   const navigationItems = [
     {
@@ -42,6 +64,11 @@ export function SiteHeader() {
       icon: Info,
       label: "Info",
     },
+    ...(isAdminUser ? [{
+      href: "/admin",
+      icon: Settings,
+      label: "Admin",
+    }] : []),
   ];
   return (
     <header className="border-b bg-white">
