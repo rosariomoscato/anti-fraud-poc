@@ -200,12 +200,10 @@ export default function InfoPage() {
               <div className="space-y-3">
                 <h4 className="font-semibold text-gray-900 dark:text-white">Frontend</h4>
                 <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-                  <li>• Next.js 14 - Framework React full-stack</li>
                   <li>• TypeScript - Tipizzazione sicura</li>
                   <li>• Tailwind CSS - Styling moderno</li>
                   <li>• shadcn/ui - Componenti UI accessibili</li>
                   <li>• Radix UI - Primitives accessibili</li>
-                  <li>• Lucide React - Icone moderne</li>
                 </ul>
               </div>
               
@@ -215,8 +213,7 @@ export default function InfoPage() {
                   <li>• Node.js - Runtime JavaScript</li>
                   <li>• Drizzle ORM - Query builder TypeScript</li>
                   <li>• PostgreSQL - Database relazionale</li>
-                  <li>• API Routes - Endpoint Next.js</li>
-                  <li>• NextAuth - Autenticazione</li>
+                  <li>• Better Auth - Autenticazione</li>
                 </ul>
               </div>
             </div>
@@ -240,7 +237,7 @@ export default function InfoPage() {
                 <span className="text-white text-xl font-bold">RM</span>
               </div>
               <div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white">RosMoS</h3>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white">RoMoS</h3>
                 <p className="text-gray-600 dark:text-gray-400">Full Stack Developer</p>
               </div>
             </div>
