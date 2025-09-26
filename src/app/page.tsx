@@ -64,58 +64,38 @@ export default function Home() {
     // Load dashboard data only if authenticated
     if (session) {
       const loadDashboardData = async () => {
-        // In a real app, this would fetch from API endpoints
-        await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      setStats({
-        totalClaims: 1247,
-        highRiskClaims: 89,
-        pendingInvestigations: 34,
-        fraudDetected: 156,
-        avgRiskScore: 42.3,
-        totalProcessed: 1091
-      });
+        try {
+          // Fetch dashboard statistics
+          const statsResponse = await fetch('/api/dashboard/stats');
+          const statsData = await statsResponse.json();
+          
+          if (statsData.success) {
+            setStats(statsData.data);
+          }
 
-      setRecentActivity([
-        {
-          id: "1",
-          type: "claim",
-          claimNumber: "CLM-2024-0892",
-          claimant: "Mario Rossi",
-          riskScore: 85,
-          status: "HIGH_RISK",
-          timestamp: "2 hours ago"
-        },
-        {
-          id: "2", 
-          type: "detection",
-          claimNumber: "CLM-2024-0891",
-          claimant: "Laura Bianchi",
-          riskScore: 92,
-          status: "FRAUD_DETECTED",
-          timestamp: "3 hours ago"
-        },
-        {
-          id: "3",
-          type: "investigation",
-          claimNumber: "CLM-2024-0889",
-          claimant: "Giuseppe Verdi",
-          riskScore: 78,
-          status: "UNDER_INVESTIGATION",
-          timestamp: "5 hours ago"
-        },
-        {
-          id: "4",
-          type: "claim",
-          claimNumber: "CLM-2024-0890",
-          claimant: "Anna Neri",
-          riskScore: 15,
-          status: "APPROVED",
-          timestamp: "6 hours ago"
+          // Fetch recent activity
+          const activityResponse = await fetch('/api/dashboard/activity');
+          const activityData = await activityResponse.json();
+          
+          if (activityData.success) {
+            setRecentActivity(activityData.data);
+          }
+
+        } catch (error) {
+          console.error('Error loading dashboard data:', error);
+          // Fallback to mock data if API fails
+          setStats({
+            totalClaims: 0,
+            highRiskClaims: 0,
+            pendingInvestigations: 0,
+            fraudDetected: 0,
+            avgRiskScore: 0,
+            totalProcessed: 0
+          });
+          setRecentActivity([]);
+        } finally {
+          setLoading(false);
         }
-      ]);
-
-      setLoading(false);
       };
 
       loadDashboardData();
@@ -229,7 +209,7 @@ export default function Home() {
               <div>
                 <p className="text-sm font-medium text-gray-600">Indagini in Corso</p>
                 <p className="text-3xl font-bold text-orange-600">{stats.pendingInvestigations}</p>
-                <p className="text-sm text-gray-600">Richiedono attenzione</p>
+                <p className="text-sm text-gray-600">Include: UNDER_INVESTIGATION, HIGH, URGENT</p>
               </div>
               <div className="p-3 bg-orange-100 rounded-lg">
                 <Search className="h-6 w-6 text-orange-600" />
