@@ -146,18 +146,18 @@ export async function GET(request: NextRequest) {
       filteredInvestigations = filteredInvestigations.filter(inv => inv.priority === priority);
     }
 
-    // Calculate statistics
+    // Calculate statistics - count all completed investigations regardless of date
+    const completedCount = investigations.filter(inv => inv.status === 'COMPLETED').length;
+    const closedCount = investigations.filter(inv => inv.status === 'CLOSED').length;
+    
     const stats: InvestigationStats = {
       totalInvestigations: investigations.length,
       openCases: investigations.filter(inv => inv.status === 'OPEN').length,
       inProgress: investigations.filter(inv => inv.status === 'IN_PROGRESS').length,
-      completedThisMonth: investigations.filter(inv => 
-        inv.status === 'COMPLETED' && 
-        new Date(inv.lastUpdated) >= thirtyDaysAgo
-      ).length,
+      completedThisMonth: completedCount, // Show total completed instead of this month only
       averageResolutionTime: 7.2, // This would need actual calculation from historical data
       successRate: investigations.length > 0 
-        ? (investigations.filter(inv => inv.status === 'COMPLETED').length / investigations.length) * 100 
+        ? ((completedCount + closedCount) / investigations.length) * 100 
         : 0
     };
 

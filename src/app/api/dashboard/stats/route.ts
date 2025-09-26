@@ -57,11 +57,11 @@ export async function GET(request: NextRequest) {
       claim.priorityLevel === 'HIGH' || claim.priorityLevel === 'URGENT'
     ).length;
 
-    // Calculate pending investigations (claims with UNDER_INVESTIGATION status or high priority that need attention)
+    // Calculate pending investigations (claims that are actually under investigation)
     const pendingInvestigations = claims.filter(claim => 
       claim.claimStatus === 'UNDER_INVESTIGATION' ||
-      claim.priorityLevel === 'HIGH' ||
-      claim.priorityLevel === 'URGENT'
+      claim.claimStatus === 'SUBMITTED' ||
+      claim.claimStatus === 'PENDING'
     ).length;
 
     // Calculate fraud detected (claims with high fraud score or high risk)

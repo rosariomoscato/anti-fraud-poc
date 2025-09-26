@@ -27,7 +27,8 @@
       "mcp__shadcn__get_add_command_for_items",
       "Bash(pnpm dlx shadcn@latest add:*)",
       "Bash(npx shadcn@latest add:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(sqlite3:*)"
     ],
     "additionalDirectories": [
       "C:\\c\\Projects\\nextjs-better-auth-postgresql-starter-kit"

@@ -245,7 +245,7 @@ export default function Home() {
               <div>
                 <p className="text-sm font-medium text-gray-600">Indagini in Corso</p>
                 <p className="text-3xl font-bold text-orange-600">{stats.pendingInvestigations}</p>
-                <p className="text-sm text-gray-600">Include: UNDER_INVESTIGATION, HIGH, URGENT</p>
+                <p className="text-sm text-gray-600">Include sinistri appena inviati, sotto indagine e in attesa di elaborazione</p>
               </div>
               <div className="p-3 bg-orange-100 rounded-lg">
                 <Search className="h-6 w-6 text-orange-600" />
