@@ -259,9 +259,9 @@ Questo progetto è sotto licenza MIT - vedi il file [LICENSE](LICENSE) per i det
 
 ## 🆘 Supporto
 
-In caso di problemi, visita la sezione Issues su Gitea:
+In caso di problemi, visita la sezione Issues su Github:
 
-**https://gitea.rosmoscato.xyz/ros/anti-fraud-poc/issues**
+**https://github.com/rosariomoscato/anti-fraud-poc/issues**
 
 Prima di creare una nuova issue:
 1. Controlla se il problema è già stato segnalato
