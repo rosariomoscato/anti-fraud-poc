@@ -55,6 +55,9 @@ export default function InvestigationsPage() {
   const [loading, setLoading] = useState(true);
   const [selectedStatus, setSelectedStatus] = useState<string>('ALL');
   const [selectedPriority, setSelectedPriority] = useState<string>('ALL');
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState<boolean>(false);
+  const [updatingInvestigation, setUpdatingInvestigation] = useState<string | null>(null);
 
   // Reindirizza alla landing page se non autenticato e carica dati se autenticato
   useEffect(() => {
@@ -64,6 +67,13 @@ export default function InvestigationsPage() {
       loadInvestigationsData();
     }
   }, [session, isPending, router]);
+
+  // Reload data when filters change
+  useEffect(() => {
+    if (session) {
+      loadInvestigationsData();
+    }
+  }, [selectedStatus, selectedPriority, searchTerm, session]);
 
   if (isPending) {
     return (
@@ -86,98 +96,159 @@ export default function InvestigationsPage() {
 
   const loadInvestigationsData = async () => {
     setLoading(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    const mockInvestigations: Investigation[] = [
-      {
-        id: "1",
-        claimNumber: "CLM-2024-0892",
-        claimantName: "Mario Rossi",
-        claimType: "THEFT",
-        incidentDate: "2024-09-15",
-        incidentLocation: "Roma, RM",
-        riskScore: 85,
-        status: "IN_PROGRESS",
-        priority: "HIGH",
-        assignedTo: "Agent. Bianchi",
-        estimatedAmount: 25000,
-        fraudIndicators: ["Orario notturno", "Area ad alto rischio", "Veicolo di lusso"],
-        lastUpdated: "2 ore fa"
-      },
-      {
-        id: "2",
-        claimNumber: "CLM-2024-0891",
-        claimantName: "Laura Bianchi",
-        claimType: "COLLISION",
-        incidentDate: "2024-09-14",
-        incidentLocation: "Milano, MI",
-        riskScore: 92,
-        status: "OPEN",
-        priority: "URGENT",
-        estimatedAmount: 35000,
-        fraudIndicators: ["Importo elevato", "Testimoni contraddittori", "Danni sospetti"],
-        lastUpdated: "1 ora fa"
-      },
-      {
-        id: "3",
-        claimNumber: "CLM-2024-0889",
-        claimantName: "Giuseppe Verdi",
-        claimType: "VANDALISM",
-        incidentDate: "2024-09-12",
-        incidentLocation: "Napoli, NA",
-        riskScore: 78,
-        status: "UNDER_REVIEW",
-        priority: "MEDIUM",
-        assignedTo: "Agent. Russo",
-        estimatedAmount: 8500,
-        fraudIndicators: ["Storico frodi", "Multiple rivendicazioni"],
-        lastUpdated: "5 ore fa"
-      },
-      {
-        id: "4",
-        claimNumber: "CLM-2024-0890",
-        claimantName: "Anna Neri",
-        claimType: "COLLISION",
-        incidentDate: "2024-09-10",
-        incidentLocation: "Torino, TO",
-        riskScore: 45,
-        status: "COMPLETED",
-        priority: "LOW",
-        assignedTo: "Agent. Ferrari",
-        estimatedAmount: 3500,
-        fraudIndicators: ["Danni minori"],
-        lastUpdated: "1 giorno fa"
-      },
-      {
-        id: "5",
-        claimNumber: "CLM-2024-0888",
-        claimantName: "Carlo Mancini",
-        claimType: "THEFT",
-        incidentDate: "2024-09-08",
-        incidentLocation: "Palermo, PA",
-        riskScore: 88,
-        status: "CLOSED",
-        priority: "HIGH",
-        assignedTo: "Agent. Esposito",
-        estimatedAmount: 42000,
-        fraudIndicators: ["Frode confermata", "Documenti falsi"],
-        lastUpdated: "3 giorni fa"
+    try {
+      // Build query parameters
+      const params = new URLSearchParams();
+      if (selectedStatus !== 'ALL') params.append('status', selectedStatus);
+      if (selectedPriority !== 'ALL') params.append('priority', selectedPriority);
+      if (searchTerm) params.append('search', searchTerm);
+      
+      const response = await fetch(`/api/investigations?${params.toString()}`);
+      const data = await response.json();
+      
+      if (data.success) {
+        setInvestigations(data.data.investigations);
+        setStats(data.data.stats);
+      } else {
+        // Fallback to mock data if API fails
+        const mockInvestigations: Investigation[] = [
+          {
+            id: "1",
+            claimNumber: "CLM-2024-0892",
+            claimantName: "Mario Rossi",
+            claimType: "THEFT",
+            incidentDate: "2024-09-15",
+            incidentLocation: "Roma, RM",
+            riskScore: 85,
+            status: "IN_PROGRESS",
+            priority: "HIGH",
+            assignedTo: "Agent. Bianchi",
+            estimatedAmount: 25000,
+            fraudIndicators: ["Orario notturno", "Area ad alto rischio", "Veicolo di lusso"],
+            lastUpdated: "2 ore fa"
+          },
+          {
+            id: "2",
+            claimNumber: "CLM-2024-0891",
+            claimantName: "Laura Bianchi",
+            claimType: "COLLISION",
+            incidentDate: "2024-09-14",
+            incidentLocation: "Milano, MI",
+            riskScore: 92,
+            status: "OPEN",
+            priority: "URGENT",
+            estimatedAmount: 35000,
+            fraudIndicators: ["Importo elevato", "Testimoni contraddittori", "Danni sospetti"],
+            lastUpdated: "1 ora fa"
+          },
+          {
+            id: "3",
+            claimNumber: "CLM-2024-0889",
+            claimantName: "Giuseppe Verdi",
+            claimType: "VANDALISM",
+            incidentDate: "2024-09-12",
+            incidentLocation: "Napoli, NA",
+            riskScore: 78,
+            status: "UNDER_REVIEW",
+            priority: "MEDIUM",
+            assignedTo: "Agent. Russo",
+            estimatedAmount: 8500,
+            fraudIndicators: ["Storico frodi", "Multiple rivendicazioni"],
+            lastUpdated: "5 ore fa"
+          },
+          {
+            id: "4",
+            claimNumber: "CLM-2024-0890",
+            claimantName: "Anna Neri",
+            claimType: "COLLISION",
+            incidentDate: "2024-09-10",
+            incidentLocation: "Torino, TO",
+            riskScore: 45,
+            status: "COMPLETED",
+            priority: "LOW",
+            assignedTo: "Agent. Ferrari",
+            estimatedAmount: 3500,
+            fraudIndicators: ["Danni minori"],
+            lastUpdated: "1 giorno fa"
+          },
+          {
+            id: "5",
+            claimNumber: "CLM-2024-0888",
+            claimantName: "Carlo Mancini",
+            claimType: "THEFT",
+            incidentDate: "2024-09-08",
+            incidentLocation: "Palermo, PA",
+            riskScore: 88,
+            status: "CLOSED",
+            priority: "HIGH",
+            assignedTo: "Agent. Esposito",
+            estimatedAmount: 42000,
+            fraudIndicators: ["Frode confermata", "Documenti falsi"],
+            lastUpdated: "3 giorni fa"
+          }
+        ];
+
+        const mockStats: InvestigationStats = {
+          totalInvestigations: 156,
+          openCases: 23,
+          inProgress: 45,
+          completedThisMonth: 18,
+          averageResolutionTime: 7.2,
+          successRate: 87.5
+        };
+
+        setInvestigations(mockInvestigations);
+        setStats(mockStats);
       }
-    ];
+    } catch (error) {
+      console.error('Error loading investigations:', error);
+      // Fallback to mock data
+      const mockInvestigations: Investigation[] = [
+        {
+          id: "1",
+          claimNumber: "CLM-2024-0892",
+          claimantName: "Mario Rossi",
+          claimType: "THEFT",
+          incidentDate: "2024-09-15",
+          incidentLocation: "Roma, RM",
+          riskScore: 85,
+          status: "IN_PROGRESS",
+          priority: "HIGH",
+          assignedTo: "Agent. Bianchi",
+          estimatedAmount: 25000,
+          fraudIndicators: ["Orario notturno", "Area ad alto rischio", "Veicolo di lusso"],
+          lastUpdated: "2 ore fa"
+        },
+        {
+          id: "2",
+          claimNumber: "CLM-2024-0891",
+          claimantName: "Laura Bianchi",
+          claimType: "COLLISION",
+          incidentDate: "2024-09-14",
+          incidentLocation: "Milano, MI",
+          riskScore: 92,
+          status: "OPEN",
+          priority: "URGENT",
+          estimatedAmount: 35000,
+          fraudIndicators: ["Importo elevato", "Testimoni contraddittori", "Danni sospetti"],
+          lastUpdated: "1 ora fa"
+        }
+      ];
 
-    const mockStats: InvestigationStats = {
-      totalInvestigations: 156,
-      openCases: 23,
-      inProgress: 45,
-      completedThisMonth: 18,
-      averageResolutionTime: 7.2,
-      successRate: 87.5
-    };
+      const mockStats: InvestigationStats = {
+        totalInvestigations: 156,
+        openCases: 23,
+        inProgress: 45,
+        completedThisMonth: 18,
+        averageResolutionTime: 7.2,
+        successRate: 87.5
+      };
 
-    setInvestigations(mockInvestigations);
-    setStats(mockStats);
-    setLoading(false);
+      setInvestigations(mockInvestigations);
+      setStats(mockStats);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const getStatusBadge = (status: string) => {
@@ -239,8 +310,40 @@ export default function InvestigationsPage() {
   const filteredInvestigations = investigations.filter(inv => {
     const statusMatch = selectedStatus === 'ALL' || inv.status === selectedStatus;
     const priorityMatch = selectedPriority === 'ALL' || inv.priority === selectedPriority;
-    return statusMatch && priorityMatch;
+    const searchMatch = searchTerm === '' || 
+      inv.claimNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      inv.claimantName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      inv.claimType.toLowerCase().includes(searchTerm.toLowerCase());
+    return statusMatch && priorityMatch && searchMatch;
   });
+
+  const updateInvestigationStatus = async (id: string, newStatus: string, assignedTo?: string) => {
+    setUpdatingInvestigation(id);
+    try {
+      const response = await fetch('/api/investigations', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id,
+          status: newStatus,
+          assignedTo
+        }),
+      });
+
+      if (response.ok) {
+        // Refresh the data
+        await loadInvestigationsData();
+      } else {
+        console.error('Failed to update investigation');
+      }
+    } catch (error) {
+      console.error('Error updating investigation:', error);
+    } finally {
+      setUpdatingInvestigation(null);
+    }
+  };
 
   if (loading) {
     return (
@@ -266,7 +369,21 @@ export default function InvestigationsPage() {
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <Button variant="outline" size="sm">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Cerca per numero, nome o tipo..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-md text-sm w-64"
+                />
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+              >
                 <Filter className="h-4 w-4 mr-2" />
                 Filtri Avanzati
               </Button>
@@ -348,45 +465,47 @@ export default function InvestigationsPage() {
           </Card>
         </div>
 
-        {/* Filters */}
-        <Card className="p-6 mb-6">
-          <div className="flex flex-wrap gap-4 items-center">
-            <div className="flex items-center space-x-2">
-              <span className="text-sm font-medium text-gray-700">Stato:</span>
-              <select 
-                value={selectedStatus}
-                onChange={(e) => setSelectedStatus(e.target.value)}
-                className="border border-gray-300 rounded-md px-3 py-1 text-sm"
-              >
-                <option value="ALL">Tutti</option>
-                <option value="OPEN">Aperti</option>
-                <option value="IN_PROGRESS">In Corso</option>
-                <option value="UNDER_REVIEW">In Revisione</option>
-                <option value="COMPLETED">Completati</option>
-                <option value="CLOSED">Chiusi</option>
-              </select>
+        {/* Advanced Filters */}
+        {showAdvancedFilters && (
+          <Card className="p-6 mb-6">
+            <div className="flex flex-wrap gap-4 items-center">
+              <div className="flex items-center space-x-2">
+                <span className="text-sm font-medium text-gray-700">Stato:</span>
+                <select 
+                  value={selectedStatus}
+                  onChange={(e) => setSelectedStatus(e.target.value)}
+                  className="border border-gray-300 rounded-md px-3 py-1 text-sm"
+                >
+                  <option value="ALL">Tutti</option>
+                  <option value="OPEN">Aperti</option>
+                  <option value="IN_PROGRESS">In Corso</option>
+                  <option value="UNDER_REVIEW">In Revisione</option>
+                  <option value="COMPLETED">Completati</option>
+                  <option value="CLOSED">Chiusi</option>
+                </select>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <span className="text-sm font-medium text-gray-700">Priorità:</span>
+                <select 
+                  value={selectedPriority}
+                  onChange={(e) => setSelectedPriority(e.target.value)}
+                  className="border border-gray-300 rounded-md px-3 py-1 text-sm"
+                >
+                  <option value="ALL">Tutte</option>
+                  <option value="URGENT">Urgente</option>
+                  <option value="HIGH">Alta</option>
+                  <option value="MEDIUM">Media</option>
+                  <option value="LOW">Bassa</option>
+                </select>
+              </div>
+              
+              <div className="ml-auto text-sm text-gray-600">
+                Mostrando {filteredInvestigations.length} di {investigations.length} indagini
+              </div>
             </div>
-            
-            <div className="flex items-center space-x-2">
-              <span className="text-sm font-medium text-gray-700">Priorità:</span>
-              <select 
-                value={selectedPriority}
-                onChange={(e) => setSelectedPriority(e.target.value)}
-                className="border border-gray-300 rounded-md px-3 py-1 text-sm"
-              >
-                <option value="ALL">Tutte</option>
-                <option value="URGENT">Urgente</option>
-                <option value="HIGH">Alta</option>
-                <option value="MEDIUM">Media</option>
-                <option value="LOW">Bassa</option>
-              </select>
-            </div>
-            
-            <div className="ml-auto text-sm text-gray-600">
-              Mostrando {filteredInvestigations.length} di {investigations.length} indagini
-            </div>
-          </div>
-        </Card>
+          </Card>
+        )}
 
         {/* Investigations List */}
         <div className="space-y-4">
@@ -447,7 +566,49 @@ export default function InvestigationsPage() {
                 
                 <div className="flex flex-col items-end space-y-2 ml-4">
                   <span className="text-xs text-gray-500">{investigation.lastUpdated}</span>
-                  <Button variant="outline" size="sm">
+                  
+                  {/* Status Update Controls */}
+                  {investigation.status !== 'COMPLETED' && investigation.status !== 'CLOSED' && (
+                    <div className="flex space-x-1">
+                      {investigation.status === 'OPEN' && (
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => updateInvestigationStatus(investigation.id, 'IN_PROGRESS')}
+                          disabled={updatingInvestigation === investigation.id}
+                        >
+                          {updatingInvestigation === investigation.id ? (
+                            <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-primary"></div>
+                          ) : (
+                            <Clock className="h-3 w-3" />
+                          )}
+                          <span className="ml-1 text-xs">Avvia</span>
+                        </Button>
+                      )}
+                      
+                      {investigation.status === 'IN_PROGRESS' && (
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => updateInvestigationStatus(investigation.id, 'COMPLETED')}
+                          disabled={updatingInvestigation === investigation.id}
+                        >
+                          {updatingInvestigation === investigation.id ? (
+                            <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-primary"></div>
+                          ) : (
+                            <CheckCircle className="h-3 w-3" />
+                          )}
+                          <span className="ml-1 text-xs">Completa</span>
+                        </Button>
+                      )}
+                    </div>
+                  )}
+                  
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => router.push(`/investigations/${investigation.id}`)}
+                  >
                     <Eye className="h-4 w-4 mr-2" />
                     Dettagli
                   </Button>
