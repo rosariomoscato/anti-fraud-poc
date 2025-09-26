@@ -194,7 +194,7 @@ export async function GET(request: NextRequest) {
         // Then by date (most recent first)
         return b.eventDate.getTime() - a.eventDate.getTime();
       })
-      .slice(0, 10);
+      .slice(0, 5);
 
     // Transform to activity format
     const recentActivity: RecentActivity[] = significantEvents.map(event => ({

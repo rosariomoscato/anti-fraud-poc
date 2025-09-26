@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 
 interface DashboardStats {
   totalClaims: number;
@@ -40,6 +41,19 @@ interface RecentActivity {
   significance: 'low' | 'medium' | 'high' | 'critical';
 }
 
+interface RiskDistribution {
+  low: number;
+  medium: number;
+  high: number;
+  total: number;
+  categories: {
+    name: string;
+    value: number;
+    percentage: number;
+    color: string;
+  }[];
+}
+
 export default function Home() {
   const { data: session, isPending } = useSession();
   const router = useRouter();
@@ -54,6 +68,7 @@ export default function Home() {
   });
 
   const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
+  const [riskDistribution, setRiskDistribution] = useState<RiskDistribution | null>(null);
   const [loading, setLoading] = useState(true);
 
   // Reindirizza alla landing page se non autenticato
@@ -84,6 +99,14 @@ export default function Home() {
             setRecentActivity(activityData.data);
           }
 
+          // Fetch risk distribution
+          const riskResponse = await fetch('/api/dashboard/risk-distribution');
+          const riskData = await riskResponse.json();
+          
+          if (riskData.success) {
+            setRiskDistribution(riskData.data);
+          }
+
         } catch (error) {
           console.error('Error loading dashboard data:', error);
           // Fallback to mock data if API fails
@@ -96,6 +119,7 @@ export default function Home() {
             totalProcessed: 0
           });
           setRecentActivity([]);
+          setRiskDistribution(null);
         } finally {
           setLoading(false);
         }
@@ -245,6 +269,98 @@ export default function Home() {
           </Card>
         </div>
 
+        {/* Risk Distribution Chart */}
+        <Card className="p-6 mt-8">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-semibold text-gray-900">Distribuzione del Rischio</h2>
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2">
+                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                <span className="text-sm text-gray-600">Basso (1-30)</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                <span className="text-sm text-gray-600">Medio (31-70)</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                <span className="text-sm text-gray-600">Alto (71-100)</span>
+              </div>
+            </div>
+          </div>
+          
+          {riskDistribution ? (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Chart */}
+              <div className="h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={riskDistribution.categories}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={({ name, percentage }) => `${name}: ${(percentage as number).toFixed(1)}%`}
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="value"
+                    >
+                      {riskDistribution.categories.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip 
+                      formatter={(value, name) => [value, 'Numero Sinistri']}
+                      labelFormatter={(label) => label}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              
+              {/* Stats */}
+              <div className="space-y-4">
+                <div className="text-center">
+                  <p className="text-3xl font-bold text-gray-900">{riskDistribution.total}</p>
+                  <p className="text-sm text-gray-600">Totale Sinistri Analizzati</p>
+                </div>
+                
+                <div className="space-y-3">
+                  {riskDistribution.categories.map((category, index) => (
+                    <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <div 
+                          className="w-4 h-4 rounded-full" 
+                          style={{ backgroundColor: category.color }}
+                        ></div>
+                        <span className="text-sm font-medium text-gray-900">{category.name}</span>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-bold text-gray-900">{category.value}</p>
+                        <p className="text-xs text-gray-600">{category.percentage.toFixed(1)}%</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                
+                <div className="p-3 bg-blue-50 rounded-lg">
+                  <p className="text-sm text-blue-800">
+                    <span className="font-medium">Analisi Rischio:</span> {riskDistribution.low} basso rischio, 
+                    {riskDistribution.medium} medio rischio, {riskDistribution.high} alto rischio
+                  </p>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="h-64 bg-gray-100 rounded-lg flex items-center justify-center">
+              <div className="text-center">
+                <BarChart3 className="h-12 w-12 text-gray-400 mx-auto mb-2" />
+                <p className="text-gray-500">Caricamento dati distribuzione rischio...</p>
+                <p className="text-sm text-gray-400">In attesa di dati dal sistema</p>
+              </div>
+            </div>
+          )}
+        </Card>
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Recent Activity */}
           <Card className="p-6">
@@ -338,34 +454,7 @@ export default function Home() {
           </Card>
         </div>
 
-        {/* Risk Distribution Chart Placeholder */}
-        <Card className="p-6 mt-8">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-semibold text-gray-900">Distribuzione del Rischio</h2>
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
-                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                <span className="text-sm text-gray-600">Basso (1-30)</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                <span className="text-sm text-gray-600">Medio (31-70)</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                <span className="text-sm text-gray-600">Alto (71-100)</span>
-              </div>
-            </div>
-          </div>
-          <div className="h-64 bg-gray-100 rounded-lg flex items-center justify-center">
-            <div className="text-center">
-              <BarChart3 className="h-12 w-12 text-gray-400 mx-auto mb-2" />
-              <p className="text-gray-500">Grafico Distribuzione Rischio</p>
-              <p className="text-sm text-gray-400">Visualizzazione interattiva in arrivo</p>
-            </div>
-          </div>
-        </Card>
-      </main>
+        </main>
     </div>
   );
 }
