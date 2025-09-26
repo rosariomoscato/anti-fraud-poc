@@ -85,32 +85,32 @@ export default function AdminPage() {
   if (isPending || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-red-600"></div>
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
       </div>
     );
   }
 
   const getHealthColor = (health: 'healthy' | 'warning' | 'error') => {
     switch (health) {
-      case 'healthy': return 'text-green-600 bg-green-100 dark:bg-green-900/20';
-      case 'warning': return 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900/20';
-      case 'error': return 'text-red-600 bg-red-100 dark:bg-red-900/20';
+      case 'healthy': return 'text-green-600 bg-green-50 border-green-500';
+      case 'warning': return 'text-yellow-600 bg-yellow-50 border-yellow-500';
+      case 'error': return 'text-red-600 bg-red-50 border-red-500';
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen bg-gradient-to-br from-primary/5 to-primary/10">
       {/* Header */}
-      <header className="border-b bg-white/80 backdrop-blur-sm dark:bg-gray-900/80">
+      <header className="border-b bg-card/80 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-red-600">
-                <Shield className="h-6 w-6 text-white" />
+              <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary">
+                <Shield className="h-6 w-6 text-primary-foreground" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-gray-900 dark:text-white">Admin</h1>
-                <p className="text-xs text-gray-600 dark:text-gray-400">Pannello di Amministrazione</p>
+                <h1 className="text-xl font-bold text-foreground">Admin</h1>
+                <p className="text-xs text-muted-foreground">Pannello di Amministrazione</p>
               </div>
             </div>
             <div className="flex items-center space-x-4">
@@ -126,10 +126,10 @@ export default function AdminPage() {
       <main className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Admin Dashboard Overview */}
         <div className="mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+          <h2 className="text-2xl font-bold text-foreground mb-2">
             Benvenuto, {session?.user?.name || 'Admin'}
           </h2>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-muted-foreground">
             Gestisci il sistema di rilevamento frodi e monitora le attività
           </p>
         </div>
@@ -172,7 +172,7 @@ export default function AdminPage() {
                 <Users className="mr-2 h-4 w-4" />
                 Visualizza Utenti
               </Button>
-              <div className="text-sm text-gray-600 dark:text-gray-400">
+              <div className="text-sm text-muted-foreground">
                 <p>• Visualizza tutti gli utenti registrati</p>
                 <p>• Modifica i ruoli e i permessi</p>
                 <p>• Gestisci le attività utente</p>
@@ -200,7 +200,7 @@ export default function AdminPage() {
                 <Settings className="mr-2 h-4 w-4" />
                 Log di Sistema
               </Button>
-              <div className="text-sm text-gray-600 dark:text-gray-400">
+              <div className="text-sm text-muted-foreground">
                 <p>• Visualizza log attività admin</p>
                 <p>• Monitora performance sistema</p>
                 <p>• Analizza attività utente</p>

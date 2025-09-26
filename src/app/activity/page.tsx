@@ -264,9 +264,9 @@ export default function ActivityPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200">
+      <header className="bg-card border-b border-border">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -277,8 +277,8 @@ export default function ActivityPage() {
                 </Link>
               </Button>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Tutte le Attività</h1>
-                <p className="text-sm text-gray-600">Eventi significativi del sistema anti-frode (ultimi 30 giorni)</p>
+                <h1 className="text-2xl font-bold text-foreground">Tutte le Attività</h1>
+                <p className="text-sm text-muted-foreground">Eventi significativi del sistema anti-frode (ultimi 30 giorni)</p>
               </div>
             </div>
           </div>
@@ -291,8 +291,8 @@ export default function ActivityPage() {
         <Card className="p-6 mb-6">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="text-lg font-semibold text-gray-900">Filtri</h2>
-              <p className="text-sm text-gray-500">Dati degli ultimi 30 giorni dal {new Date().toLocaleDateString('it-IT')}</p>
+              <h2 className="text-lg font-semibold text-foreground">Filtri</h2>
+              <p className="text-sm text-muted-foreground">Dati degli ultimi 30 giorni dal {new Date().toLocaleDateString('it-IT')}</p>
             </div>
             <Button 
               variant="outline" 
@@ -306,7 +306,7 @@ export default function ActivityPage() {
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Tipo Evento</label>
+              <label className="block text-sm font-medium text-foreground mb-2">Tipo Evento</label>
               <select 
                 value={filters.type}
                 onChange={(e) => setFilters({...filters, type: e.target.value})}
@@ -322,7 +322,7 @@ export default function ActivityPage() {
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Significanza</label>
+              <label className="block text-sm font-medium text-foreground mb-2">Significanza</label>
               <select 
                 value={filters.significance}
                 onChange={(e) => setFilters({...filters, significance: e.target.value})}
@@ -337,9 +337,9 @@ export default function ActivityPage() {
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Cerca</label>
+              <label className="block text-sm font-medium text-foreground mb-2">Cerca</label>
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <input 
                   type="text"
                   value={filters.search}

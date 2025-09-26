@@ -160,15 +160,15 @@ export default function LogsPage() {
   if (isPending || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-red-600"></div>
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen bg-gradient-to-br from-primary/5 to-primary/10">
       {/* Header */}
-      <header className="border-b bg-white/80 backdrop-blur-sm dark:bg-gray-900/80">
+      <header className="border-b bg-card/80 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
@@ -181,12 +181,12 @@ export default function LogsPage() {
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Indietro
               </Button>
-              <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-red-600">
-                <Activity className="h-6 w-6 text-white" />
+              <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary">
+                <Activity className="h-6 w-6 text-primary-foreground" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-gray-900 dark:text-white">Log di Sistema</h1>
-                <p className="text-xs text-gray-600 dark:text-gray-400">Attività amministrative recenti</p>
+                <h1 className="text-xl font-bold text-foreground">Log di Sistema</h1>
+                <p className="text-xs text-muted-foreground">Attività amministrative recenti</p>
               </div>
             </div>
             <div className="flex items-center space-x-4">
@@ -202,10 +202,10 @@ export default function LogsPage() {
       <main className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Page Header */}
         <div className="mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+          <h2 className="text-2xl font-bold text-foreground mb-2">
             Log delle Attività Amministrative
           </h2>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-muted-foreground">
             Visualizza tutte le azioni eseguite dagli amministratori del sistema
           </p>
         </div>
@@ -223,7 +223,7 @@ export default function LogsPage() {
               <div className="space-y-2">
                 <label className="text-sm font-medium">Cerca</label>
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     placeholder="Cerca per admin, azione..."
                     value={searchTerm}
@@ -248,8 +248,8 @@ export default function LogsPage() {
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Risultati</label>
-                <div className="flex items-center h-10 px-3 py-2 border rounded-md bg-gray-50">
-                  <span className="text-sm text-gray-600">
+                <div className="flex items-center h-10 px-3 py-2 border rounded-md bg-muted">
+                  <span className="text-sm text-muted-foreground">
                     {filteredLogs.length} di {logs.length} log
                   </span>
                 </div>
@@ -272,11 +272,11 @@ export default function LogsPage() {
           <CardContent>
             {filteredLogs.length === 0 ? (
               <div className="text-center py-8">
-                <Activity className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                <Activity className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-foreground mb-2">
                   Nessun log trovato
                 </h3>
-                <p className="text-gray-600 dark:text-gray-400">
+                <p className="text-muted-foreground">
                   Non ci sono attività amministrative da mostrare.
                 </p>
               </div>
@@ -298,12 +298,12 @@ export default function LogsPage() {
                       <TableRow key={log.id}>
                         <TableCell>
                           <div className="flex items-center space-x-2">
-                            <Calendar className="h-4 w-4 text-gray-400" />
+                            <Calendar className="h-4 w-4 text-muted-foreground" />
                             <div>
                               <div className="text-sm">
                                 {new Date(log.created_at).toLocaleDateString('it-IT')}
                               </div>
-                              <div className="text-xs text-gray-500">
+                              <div className="text-xs text-muted-foreground">
                                 {new Date(log.created_at).toLocaleTimeString('it-IT')}
                               </div>
                             </div>
@@ -311,10 +311,10 @@ export default function LogsPage() {
                         </TableCell>
                         <TableCell>
                           <div>
-                            <div className="font-medium">
+                            <div className="font-medium text-foreground">
                               {log.admin_name || 'Admin'}
                             </div>
-                            <div className="text-sm text-gray-500">
+                            <div className="text-sm text-muted-foreground">
                               {log.admin_email}
                             </div>
                           </div>
@@ -357,7 +357,7 @@ export default function LogsPage() {
                           </div>
                         </TableCell>
                         <TableCell>
-                          <div className="text-sm text-gray-500">
+                          <div className="text-sm text-muted-foreground">
                             {log.ip_address || '-'}
                           </div>
                         </TableCell>
@@ -371,7 +371,7 @@ export default function LogsPage() {
             {/* Pagination */}
             {pagination.pages > 1 && (
               <div className="flex items-center justify-between mt-6">
-                <div className="text-sm text-gray-500">
+                <div className="text-sm text-muted-foreground">
                   Pagina {pagination.page} di {pagination.pages}
                 </div>
                 <div className="flex space-x-2">

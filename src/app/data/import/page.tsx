@@ -59,7 +59,7 @@ export default function DataImportPage() {
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-gray-600">Reindirizzamento...</p>
+          <p className="text-muted-foreground">Reindirizzamento...</p>
         </div>
       </div>
     );
@@ -206,18 +206,18 @@ export default function DataImportPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200">
+      <header className="bg-card border-b border-border">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-purple-600">
-                <Database className="h-6 w-6 text-white" />
+              <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary">
+                <Database className="h-6 w-6 text-primary-foreground" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Importa Dati</h1>
-                <p className="text-sm text-gray-600">Carica dati sinistri da file CSV</p>
+                <h1 className="text-2xl font-bold text-foreground">Importa Dati</h1>
+                <p className="text-sm text-muted-foreground">Carica dati sinistri da file CSV</p>
               </div>
             </div>
             <Button variant="outline" onClick={() => router.push('/')}>
@@ -231,27 +231,27 @@ export default function DataImportPage() {
       <main className="container mx-auto px-4 py-8 max-w-4xl">
         {/* Instructions */}
         <Card className="p-6 mb-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Istruzioni per l'Importazione</h2>
+          <h2 className="text-xl font-semibold text-foreground mb-4">Istruzioni per l'Importazione</h2>
           <div className="space-y-4">
             <div className="flex items-start space-x-3">
               <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
               <div>
-                <p className="font-medium text-gray-900">1. Scarica il template</p>
-                <p className="text-sm text-gray-600">Utilizza il template fornito per garantire il formato corretto dei dati</p>
+                <p className="font-medium text-foreground">1. Scarica il template</p>
+                <p className="text-sm text-muted-foreground">Utilizza il template fornito per garantire il formato corretto dei dati</p>
               </div>
             </div>
             <div className="flex items-start space-x-3">
               <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
               <div>
-                <p className="font-medium text-gray-900">2. Compila il file CSV</p>
-                <p className="text-sm text-gray-600">Inserisci i dati seguendo la struttura del template</p>
+                <p className="font-medium text-foreground">2. Compila il file CSV</p>
+                <p className="text-sm text-muted-foreground">Inserisci i dati seguendo la struttura del template</p>
               </div>
             </div>
             <div className="flex items-start space-x-3">
               <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
               <div>
-                <p className="font-medium text-gray-900">3. Carica il file</p>
-                <p className="text-sm text-gray-600">Seleziona il file compilato e avvia l'importazione</p>
+                <p className="font-medium text-foreground">3. Carica il file</p>
+                <p className="text-sm text-muted-foreground">Seleziona il file compilato e avvia l'importazione</p>
               </div>
             </div>
           </div>
@@ -261,10 +261,10 @@ export default function DataImportPage() {
         <Card className="p-6 mb-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <FileText className="h-8 w-8 text-blue-600" />
+              <FileText className="h-8 w-8 text-primary" />
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">Template CSV</h3>
-                <p className="text-sm text-gray-600">Scarica il template per l'importazione dei dati</p>
+                <h3 className="text-lg font-semibold text-foreground">Template CSV</h3>
+                <p className="text-sm text-muted-foreground">Scarica il template per l'importazione dei dati</p>
               </div>
             </div>
             <Button 
@@ -289,16 +289,16 @@ export default function DataImportPage() {
 
         {/* File Upload */}
         <Card className="p-6 mb-8">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Carica File CSV</h3>
+          <h3 className="text-lg font-semibold text-foreground mb-4">Carica File CSV</h3>
           
           <div className="space-y-6">
             {/* File Selection */}
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-              <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-lg font-medium text-gray-900 mb-2">
+            <div className="border-2 border-dashed border-border rounded-lg p-8 text-center">
+              <Upload className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-lg font-medium text-foreground mb-2">
                 {selectedFile ? selectedFile.name : 'Seleziona un file CSV'}
               </p>
-              <p className="text-sm text-gray-600 mb-4">
+              <p className="text-sm text-muted-foreground mb-4">
                 {selectedFile 
                   ? `${(selectedFile.size / 1024).toFixed(1)} KB`
                   : 'Trascina qui il file o clicca per selezionare'
@@ -322,7 +322,7 @@ export default function DataImportPage() {
             {selectedFile && (
               <div className="space-y-4">
                 <div>
-                  <label className="text-sm font-medium text-gray-700 mb-2 block">
+                  <label className="text-sm font-medium text-foreground mb-2 block">
                     Modalità di Importazione
                   </label>
                   <div className="flex space-x-4">
@@ -339,7 +339,7 @@ export default function DataImportPage() {
                       Sovrascrivi dati esistenti
                     </Button>
                   </div>
-                  <p className="text-sm text-gray-600 mt-2">
+                  <p className="text-sm text-muted-foreground mt-2">
                     {importMode === 'append' 
                       ? 'I nuovi dati verranno aggiunti a quelli esistenti'
                       : 'I dati esistenti verranno cancellati prima dell&apos;importazione'
@@ -351,18 +351,18 @@ export default function DataImportPage() {
                 {csvPreview && (
                   <div>
                     <div className="flex items-center justify-between mb-4">
-                      <h4 className="font-medium text-gray-900">Anteprima Dati</h4>
+                      <h4 className="font-medium text-foreground">Anteprima Dati</h4>
                       <Badge variant="outline">
                         {csvPreview.totalRows} righe totali
                       </Badge>
                     </div>
                     
-                    <div className="bg-gray-50 rounded-lg p-4 overflow-x-auto">
+                    <div className="bg-muted rounded-lg p-4 overflow-x-auto">
                       <table className="w-full text-sm">
                         <thead>
                           <tr className="border-b">
                             {csvPreview.headers.map((header, index) => (
-                              <th key={index} className="text-left py-2 px-2 font-medium text-gray-700">
+                              <th key={index} className="text-left py-2 px-2 font-medium text-foreground">
                                 {header}
                               </th>
                             ))}
@@ -372,7 +372,7 @@ export default function DataImportPage() {
                           {csvPreview.rows.map((row, rowIndex) => (
                             <tr key={rowIndex} className="border-b">
                               {csvPreview.headers.map((header, colIndex) => (
-                                <td key={colIndex} className="py-2 px-2 text-gray-600">
+                                <td key={colIndex} className="py-2 px-2 text-muted-foreground">
                                   {String(row[header] || '').substring(0, 30)}
                                   {String(row[header] || '').length > 30 && '...'}
                                 </td>

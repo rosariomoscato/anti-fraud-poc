@@ -77,7 +77,7 @@ export default function SyntheticDataPage() {
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-gray-600">Reindirizzamento...</p>
+          <p className="text-muted-foreground">Reindirizzamento...</p>
         </div>
       </div>
     );
@@ -227,18 +227,18 @@ export default function SyntheticDataPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200">
+      <header className="bg-card border-b border-border">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-purple-600">
-                <Database className="h-6 w-6 text-white" />
+              <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary">
+                <Database className="h-6 w-6 text-primary-foreground" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Generatore Dati Sintetici</h1>
-                <p className="text-sm text-gray-600">Sistema di generazione dati per test anti-frode</p>
+                <h1 className="text-2xl font-bold text-foreground">Generatore Dati Sintetici</h1>
+                <p className="text-sm text-muted-foreground">Sistema di generazione dati per test anti-frode</p>
               </div>
             </div>
             <Button variant="outline">
@@ -253,22 +253,22 @@ export default function SyntheticDataPage() {
       <main className="container mx-auto px-4 py-8">
         {/* Existing Data Status */}
         <Card className="p-6 mb-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-6">Stato Dataset Esistente</h2>
-          <div className="flex items-center justify-between p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <h2 className="text-xl font-semibold text-foreground mb-6">Stato Dataset Esistente</h2>
+          <div className="flex items-center justify-between p-4 bg-primary/10 border border-primary/20 rounded-lg">
             <div className="flex items-center space-x-3">
-              <Database className="h-5 w-5 text-blue-600" />
+              <Database className="h-5 w-5 text-primary" />
               <div>
-                <p className="font-medium text-gray-900">Sinistri presenti nel database</p>
-                <p className="text-sm text-gray-600">Dataset attualmente caricato</p>
+                <p className="font-medium text-foreground">Sinistri presenti nel database</p>
+                <p className="text-sm text-muted-foreground">Dataset attualmente caricato</p>
               </div>
             </div>
             <div className="text-right">
               {isLoadingExisting ? (
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
               ) : (
                 <>
-                  <p className="text-2xl font-bold text-blue-600">{existingCount.toLocaleString()}</p>
-                  <p className="text-sm text-blue-600">record</p>
+                  <p className="text-2xl font-bold text-primary">{existingCount.toLocaleString()}</p>
+                  <p className="text-sm text-primary">record</p>
                 </>
               )}
             </div>
@@ -277,14 +277,14 @@ export default function SyntheticDataPage() {
 
         {/* Data Quality Metrics */}
         <Card className="p-6 mb-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-6">Qualità dei Dati Generati</h2>
+          <h2 className="text-xl font-semibold text-foreground mb-6">Qualità dei Dati Generati</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {dataQualityMetrics.map((metric, index) => (
-              <div key={index} className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg">
+              <div key={index} className="flex items-center space-x-3 p-4 bg-muted rounded-lg">
                 <metric.icon className="h-5 w-5 text-green-600" />
                 <div>
-                  <p className="font-medium text-gray-900">{metric.metric}</p>
-                  <p className="text-sm text-gray-600">{metric.value}</p>
+                  <p className="font-medium text-foreground">{metric.metric}</p>
+                  <p className="text-sm text-muted-foreground">{metric.value}</p>
                 </div>
                 <Badge variant={metric.status === 'optimal' ? 'default' : 'secondary'}>
                   {metric.status === 'optimal' ? 'Ottimale' : 'Buono'}
@@ -297,15 +297,15 @@ export default function SyntheticDataPage() {
         <div className="space-y-8">
           {/* Fraud Percentage Control */}
           <Card className="p-6 mb-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">Percentuale Frodi</h2>
+            <h2 className="text-xl font-semibold text-foreground mb-6">Percentuale Frodi</h2>
             
             {/* Custom Slider */}
             <div className="mb-6">
               <div className="flex items-center justify-between mb-3">
-                <label className="text-sm font-medium text-gray-700">Percentuale frodi personalizzata</label>
+                <label className="text-sm font-medium text-foreground">Percentuale frodi personalizzata</label>
                 <div className="flex items-center space-x-2">
-                  <Percent className="h-4 w-4 text-purple-600" />
-                  <span className="text-lg font-semibold text-purple-600">{fraudPercentage}%</span>
+                  <Percent className="h-4 w-4 text-primary" />
+                  <span className="text-lg font-semibold text-primary">{fraudPercentage}%</span>
                 </div>
               </div>
               <input
@@ -314,10 +314,10 @@ export default function SyntheticDataPage() {
                 max="100"
                 value={fraudPercentage}
                 onChange={(e) => setFraudPercentage(Number(e.target.value))}
-                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-purple-600"
+                className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer accent-primary"
                 disabled={isGenerating}
               />
-              <div className="flex justify-between text-xs text-gray-500 mt-1">
+              <div className="flex justify-between text-xs text-muted-foreground mt-1">
                 <span>0%</span>
                 <span>25%</span>
                 <span>50%</span>
@@ -328,7 +328,7 @@ export default function SyntheticDataPage() {
 
             {/* Quick Presets */}
             <div className="space-y-2">
-              <h3 className="text-sm font-medium text-gray-700 mb-3">Presets rapidi:</h3>
+              <h3 className="text-sm font-medium text-foreground mb-3">Presets rapidi:</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                 {fraudPercentagePresets.map((preset, index) => (
                   <Button
@@ -350,8 +350,8 @@ export default function SyntheticDataPage() {
 
             {/* Data Management Options */}
           <div className="mt-6 space-y-4">
-            <div className="flex items-center space-x-3 p-4 bg-orange-50 border border-orange-200 rounded-lg">
-              <Trash2 className="h-5 w-5 text-orange-600" />
+            <div className="flex items-center space-x-3 p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
+              <Trash2 className="h-5 w-5 text-destructive" />
               <div className="flex-1">
                 <label className="flex items-center space-x-3 cursor-pointer">
                   <input
@@ -362,8 +362,8 @@ export default function SyntheticDataPage() {
                     className="w-4 h-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500"
                   />
                   <div>
-                    <p className="font-medium text-gray-900">Cancella dataset esistente</p>
-                    <p className="text-sm text-gray-600">
+                    <p className="font-medium text-foreground">Cancella dataset esistente</p>
+                    <p className="text-sm text-muted-foreground">
                       {existingCount > 0 
                         ? `Rimuoverà ${existingCount} sinistri esistenti prima della generazione`
                         : 'Nessun dato presente da cancellare'
@@ -390,13 +390,13 @@ export default function SyntheticDataPage() {
 
           {/* Expected Fraud Display */}
           {generatedCount > 0 && (
-            <div className="mt-4 p-3 bg-purple-50 border border-purple-200 rounded-lg">
+            <div className="mt-4 p-3 bg-primary/10 border border-primary/20 rounded-lg">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
-                  <TrendingUp className="h-4 w-4 text-purple-600" />
-                  <span className="text-sm font-medium text-purple-800">Frodi attese:</span>
+                  <TrendingUp className="h-4 w-4 text-primary" />
+                  <span className="text-sm font-medium text-foreground">Frodi attese:</span>
                 </div>
-                <span className="text-lg font-semibold text-purple-600">
+                <span className="text-lg font-semibold text-primary">
                   {expectedFraudCount} / {generatedCount} ({fraudPercentage}%)
                 </span>
               </div>
@@ -408,19 +408,19 @@ export default function SyntheticDataPage() {
 
           {/* Data Generation */}
           <Card className="p-6 mt-8">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">Genera Dataset</h2>
+            <h2 className="text-xl font-semibold text-foreground mb-6">Genera Dataset</h2>
             <div className="space-y-4">
               {dataGenerationOptions.map((option, index) => (
                 <div 
                   key={index} 
-                  className="p-4 border rounded-lg hover:border-purple-300 transition-colors"
+                  className="p-4 border rounded-lg hover:border-primary/50 transition-colors"
                   onMouseEnter={() => setSelectedDatasetSize(option.count)}
                 >
                   <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-medium text-gray-900">{option.label}</h3>
+                    <h3 className="font-medium text-foreground">{option.label}</h3>
                     <Badge variant="outline">{option.count} record</Badge>
                   </div>
-                  <p className="text-sm text-gray-600 mb-3">{option.description}</p>
+                  <p className="text-sm text-muted-foreground mb-3">{option.description}</p>
                   <Button 
                     onClick={() => handleGenerateData(option.count)}
                     disabled={isGenerating}
@@ -444,14 +444,14 @@ export default function SyntheticDataPage() {
             </div>
 
             {generationStatus && (
-              <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <p className="text-sm text-blue-800">{generationStatus}</p>
+              <div className="mt-6 p-4 bg-primary/10 border border-primary/20 rounded-lg">
+                <p className="text-sm text-foreground">{generationStatus}</p>
                 {generatedCount > 0 && (
                   <div className="mt-2 space-y-1">
-                    <p className="text-sm text-blue-600">
+                    <p className="text-sm text-muted-foreground">
                       Totale sinistri generati: {generatedCount.toLocaleString()}
                     </p>
-                    <p className="text-sm text-purple-600 font-medium">
+                    <p className="text-sm text-primary font-medium">
                       Frodi attese: {expectedFraudCount.toLocaleString()} ({fraudPercentage}%)
                     </p>
                   </div>
@@ -462,21 +462,21 @@ export default function SyntheticDataPage() {
 
         {/* Data Features */}
         <Card className="p-6 mt-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-6">Caratteristiche dei Dati</h2>
+          <h2 className="text-xl font-semibold text-foreground mb-6">Caratteristiche dei Dati</h2>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             {dataFeatures.map((feature, index) => (
               <Card key={index} className="p-4">
                 <div className="flex flex-col items-center text-center space-y-3">
-                  <div className="p-3 bg-purple-100 rounded-lg">
-                    <feature.icon className="h-6 w-6 text-purple-600" />
+                  <div className="p-3 bg-primary/10 rounded-lg">
+                    <feature.icon className="h-6 w-6 text-primary" />
                   </div>
                   <div className="flex-1 w-full">
-                    <h3 className="font-semibold text-gray-900 text-sm mb-2">{feature.title}</h3>
-                    <p className="text-xs text-gray-600 mb-3 leading-relaxed">{feature.description}</p>
+                    <h3 className="font-semibold text-foreground text-sm mb-2">{feature.title}</h3>
+                    <p className="text-xs text-muted-foreground mb-3 leading-relaxed">{feature.description}</p>
                     <ul className="space-y-1">
                       {feature.features.map((feat, featIndex) => (
-                        <li key={featIndex} className="text-xs text-gray-500 flex items-start">
-                          <div className="w-1 h-1 bg-purple-400 rounded-full mr-2 mt-2 flex-shrink-0"></div>
+                        <li key={featIndex} className="text-xs text-muted-foreground flex items-start">
+                          <div className="w-1 h-1 bg-primary rounded-full mr-2 mt-2 flex-shrink-0"></div>
                           <span className="text-left leading-tight">{feat}</span>
                         </li>
                       ))}
@@ -490,7 +490,7 @@ export default function SyntheticDataPage() {
 
         {/* Export Options */}
         <Card className="p-6 mt-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-6">Opzioni di Esportazione</h2>
+          <h2 className="text-xl font-semibold text-foreground mb-6">Opzioni di Esportazione</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Button 
               variant="outline" 
@@ -500,8 +500,8 @@ export default function SyntheticDataPage() {
             >
               <Download className="h-5 w-5 mr-2 mb-2" />
               <div className="text-left">
-                <p className="font-medium">Esporta CSV</p>
-                <p className="text-sm text-gray-600">Formato compatibile Excel</p>
+                <p className="font-medium text-foreground">Esporta CSV</p>
+                <p className="text-sm text-muted-foreground">Formato compatibile Excel</p>
               </div>
             </Button>
             <Button 
@@ -512,8 +512,8 @@ export default function SyntheticDataPage() {
             >
               <Download className="h-5 w-5 mr-2 mb-2" />
               <div className="text-left">
-                <p className="font-medium">Esporta JSON</p>
-                <p className="text-sm text-gray-600">Formato strutturato</p>
+                <p className="font-medium text-foreground">Esporta JSON</p>
+                <p className="text-sm text-muted-foreground">Formato strutturato</p>
               </div>
             </Button>
             <Button 
@@ -524,13 +524,13 @@ export default function SyntheticDataPage() {
             >
               <Download className="h-5 w-5 mr-2 mb-2" />
               <div className="text-left">
-                <p className="font-medium">Esporta Parquet</p>
-                <p className="text-sm text-gray-600">Formato ottimizzato</p>
+                <p className="font-medium text-foreground">Esporta Parquet</p>
+                <p className="text-sm text-muted-foreground">Formato ottimizzato</p>
               </div>
             </Button>
           </div>
           {existingCount === 0 && (
-            <p className="text-sm text-gray-500 mt-4 text-center">
+            <p className="text-sm text-muted-foreground mt-4 text-center">
               Genera dei dati prima di poter esportare
             </p>
           )}

@@ -41,7 +41,7 @@ export function SiteHeader() {
   const navigationItems = [
     {
       href: "/",
-      icon: BarChart3,
+      icon: Shield,
       label: "Dashboard",
     },
     {

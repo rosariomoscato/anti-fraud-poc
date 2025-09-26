@@ -348,6 +348,12 @@ export default function InvestigationsPage() {
   };
 
   const getRiskColor = (score: number) => {
+    if (score <= 30) return "text-green-600 bg-green-50 border-green-500";
+    if (score <= 70) return "text-yellow-600 bg-yellow-50 border-yellow-500";
+    return "text-red-600 bg-red-50 border-red-500";
+  };
+
+  const getRiskTextColor = (score: number) => {
     if (score <= 30) return "text-green-600";
     if (score <= 70) return "text-yellow-600";
     return "text-red-600";
@@ -400,29 +406,29 @@ export default function InvestigationsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200">
+      <header className="bg-card border-b border-border">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-orange-600">
-                <Search className="h-6 w-6 text-white" />
+              <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary">
+                <Search className="h-6 w-6 text-primary-foreground" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Gestione Indagini</h1>
-                <p className="text-sm text-gray-600">Monitoraggio e gestione delle indagini anti-frode</p>
+                <h1 className="text-2xl font-bold text-foreground">Gestione Indagini</h1>
+                <p className="text-sm text-muted-foreground">Monitoraggio e gestione delle indagini anti-frode</p>
               </div>
             </div>
             <div className="flex items-center space-x-4">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <input
                   type="text"
                   placeholder="Cerca per numero, nome o tipo..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-md text-sm w-64"
+                  className="pl-10 pr-4 py-2 border border-border rounded-md text-sm w-64 bg-background text-foreground placeholder:text-muted-foreground"
                 />
               </div>
               <Button 
@@ -447,38 +453,41 @@ export default function InvestigationsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
           <Card className="p-6">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Totali Indagini</p>
-                <p className="text-2xl font-bold text-gray-900">{stats?.totalInvestigations}</p>
-                <p className="text-sm text-gray-600">Ultimi 30 giorni</p>
+              <div className="flex-1">
+                <p className="text-sm font-medium text-muted-foreground">Totali Indagini</p>
+                <p className="text-2xl font-bold text-foreground mt-1">{stats?.totalInvestigations}</p>
+                <p className="text-sm text-muted-foreground mt-2">Ultimi 30 giorni</p>
               </div>
-              <div className="p-3 bg-blue-100 rounded-lg">
-                <Search className="h-6 w-6 text-blue-600" />
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Casi Aperti</p>
-                <p className="text-2xl font-bold text-red-600">{stats?.openCases}</p>
-                <p className="text-sm text-red-600">Richiedono attenzione</p>
-              </div>
-              <div className="p-3 bg-red-100 rounded-lg">
-                <AlertTriangle className="h-6 w-6 text-red-600" />
+              <div className="p-3 bg-primary/10 rounded-lg">
+                <Search className="h-6 w-6 text-primary" />
               </div>
             </div>
           </Card>
 
           <Card className="p-6">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">In Corso</p>
-                <p className="text-2xl font-bold text-orange-600">{stats?.inProgress}</p>
-                <p className="text-sm text-gray-600">Attive</p>
+              <div className="flex-1">
+                <p className="text-sm font-medium text-muted-foreground">Casi Aperti</p>
+                <p className="text-2xl font-bold text-destructive mt-1">{stats?.openCases}</p>
+                <p className="text-sm text-destructive flex items-center gap-1 mt-2">
+                  <AlertTriangle className="h-3 w-3" />
+                  Richiedono attenzione
+                </p>
               </div>
-              <div className="p-3 bg-orange-100 rounded-lg">
+              <div className="p-3 bg-destructive/10 rounded-lg">
+                <AlertTriangle className="h-6 w-6 text-destructive" />
+              </div>
+            </div>
+          </Card>
+
+          <Card className="p-6">
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <p className="text-sm font-medium text-muted-foreground">In Corso</p>
+                <p className="text-2xl font-bold text-orange-600 mt-1">{stats?.inProgress}</p>
+                <p className="text-sm text-muted-foreground mt-2">Attive</p>
+              </div>
+              <div className="p-3 bg-orange-50 rounded-lg border-2 border-orange-500">
                 <Clock className="h-6 w-6 text-orange-600" />
               </div>
             </div>
@@ -486,12 +495,15 @@ export default function InvestigationsPage() {
 
           <Card className="p-6">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Completati</p>
-                <p className="text-2xl font-bold text-green-600">{stats?.completedThisMonth}</p>
-                <p className="text-sm text-green-600">Questo mese</p>
+              <div className="flex-1">
+                <p className="text-sm font-medium text-muted-foreground">Completati</p>
+                <p className="text-2xl font-bold text-green-600 mt-1">{stats?.completedThisMonth}</p>
+                <p className="text-sm text-green-600 flex items-center gap-1 mt-2">
+                  <CheckCircle className="h-3 w-3" />
+                  Questo mese
+                </p>
               </div>
-              <div className="p-3 bg-green-100 rounded-lg">
+              <div className="p-3 bg-green-50 rounded-lg border-2 border-green-500">
                 <CheckCircle className="h-6 w-6 text-green-600" />
               </div>
             </div>
@@ -499,12 +511,12 @@ export default function InvestigationsPage() {
 
           <Card className="p-6">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Tasso Successo</p>
-                <p className="text-2xl font-bold text-purple-600">{stats?.successRate.toFixed(1)}%</p>
-                <p className="text-sm text-gray-600">Risoluzione positiva</p>
+              <div className="flex-1">
+                <p className="text-sm font-medium text-muted-foreground">Tasso Successo</p>
+                <p className="text-2xl font-bold text-purple-600 mt-1">{stats?.successRate.toFixed(1)}%</p>
+                <p className="text-sm text-muted-foreground mt-2">Risoluzione positiva</p>
               </div>
-              <div className="p-3 bg-purple-100 rounded-lg">
+              <div className="p-3 bg-purple-50 rounded-lg border-2 border-purple-500">
                 <TrendingUp className="h-6 w-6 text-purple-600" />
               </div>
             </div>
@@ -516,11 +528,11 @@ export default function InvestigationsPage() {
           <Card className="p-6 mb-6">
             <div className="flex flex-wrap gap-4 items-center">
               <div className="flex items-center space-x-2">
-                <span className="text-sm font-medium text-gray-700">Stato:</span>
+                <span className="text-sm font-medium text-foreground">Stato:</span>
                 <select 
                   value={selectedStatus}
                   onChange={(e) => setSelectedStatus(e.target.value)}
-                  className="border border-gray-300 rounded-md px-3 py-1 text-sm"
+                  className="border border-border rounded-md px-3 py-1 text-sm bg-background text-foreground"
                 >
                   <option value="ALL">Tutti</option>
                   <option value="OPEN">Aperti</option>
@@ -532,11 +544,11 @@ export default function InvestigationsPage() {
               </div>
               
               <div className="flex items-center space-x-2">
-                <span className="text-sm font-medium text-gray-700">Priorità:</span>
+                <span className="text-sm font-medium text-foreground">Priorità:</span>
                 <select 
                   value={selectedPriority}
                   onChange={(e) => setSelectedPriority(e.target.value)}
-                  className="border border-gray-300 rounded-md px-3 py-1 text-sm"
+                  className="border border-border rounded-md px-3 py-1 text-sm bg-background text-foreground"
                 >
                   <option value="ALL">Tutte</option>
                   <option value="URGENT">Urgente</option>
@@ -546,7 +558,7 @@ export default function InvestigationsPage() {
                 </select>
               </div>
               
-              <div className="ml-auto text-sm text-gray-600">
+              <div className="ml-auto text-sm text-muted-foreground">
                 Mostrando {filteredInvestigations.length} di {investigations.length} indagini
               </div>
             </div>
@@ -560,7 +572,7 @@ export default function InvestigationsPage() {
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center space-x-4 mb-4">
-                    <h3 className="text-lg font-semibold text-gray-900">{investigation.claimNumber}</h3>
+                    <h3 className="text-lg font-semibold text-foreground">{investigation.claimNumber}</h3>
                     {getStatusBadge(investigation.status)}
                     {getPriorityBadge(investigation.priority)}
                     <div className="flex items-center space-x-1">
@@ -568,7 +580,7 @@ export default function InvestigationsPage() {
                         investigation.riskScore <= 30 ? 'bg-green-500' :
                         investigation.riskScore <= 70 ? 'bg-yellow-500' : 'bg-red-500'
                       }`}></div>
-                      <span className={`text-sm font-medium ${getRiskColor(investigation.riskScore)}`}>
+                      <span className={`text-sm font-medium ${getRiskTextColor(investigation.riskScore)}`}>
                         Rischio: {investigation.riskScore}
                       </span>
                     </div>
@@ -576,19 +588,19 @@ export default function InvestigationsPage() {
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
                     <div className="flex items-center space-x-2">
-                      <User className="h-4 w-4 text-gray-400" />
-                      <span className="text-sm text-gray-600">{investigation.claimantName}</span>
+                      <User className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm text-muted-foreground">{investigation.claimantName}</span>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <Calendar className="h-4 w-4 text-gray-400" />
-                      <span className="text-sm text-gray-600">{investigation.incidentDate}</span>
+                      <Calendar className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm text-muted-foreground">{investigation.incidentDate}</span>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <MapPin className="h-4 w-4 text-gray-400" />
-                      <span className="text-sm text-gray-600">{investigation.incidentLocation}</span>
+                      <MapPin className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm text-muted-foreground">{investigation.incidentLocation}</span>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <span className="text-sm text-gray-600">
+                      <span className="text-sm text-muted-foreground">
                         €{investigation.estimatedAmount.toLocaleString()}
                       </span>
                     </div>
@@ -596,8 +608,8 @@ export default function InvestigationsPage() {
                   
                   {investigation.assignedTo && (
                     <div className="mb-3">
-                      <span className="text-sm text-gray-600">Assegnato a: </span>
-                      <span className="text-sm font-medium text-gray-900">{investigation.assignedTo}</span>
+                      <span className="text-sm text-muted-foreground">Assegnato a: </span>
+                      <span className="text-sm font-medium text-foreground">{investigation.assignedTo}</span>
                     </div>
                   )}
                   
@@ -611,7 +623,7 @@ export default function InvestigationsPage() {
                 </div>
                 
                 <div className="flex flex-col items-end space-y-2 ml-4">
-                  <span className="text-xs text-gray-500">{investigation.lastUpdated}</span>
+                  <span className="text-xs text-muted-foreground">{investigation.lastUpdated}</span>
                   
                   {/* Status Update Controls */}
                   {investigation.status !== 'COMPLETED' && investigation.status !== 'CLOSED' && (

@@ -498,6 +498,12 @@ export default function AnalyticsDashboard() {
   };
 
   const getRiskColor = (score: number) => {
+    if (score <= 40) return 'text-green-600 bg-green-50 border-green-500';
+    if (score <= 60) return 'text-yellow-600 bg-yellow-50 border-yellow-500';
+    return 'text-red-600 bg-red-50 border-red-500';
+  };
+
+  const getRiskTextColor = (score: number) => {
     if (score <= 40) return 'text-green-600';
     if (score <= 60) return 'text-yellow-600';
     return 'text-red-600';
@@ -514,30 +520,30 @@ export default function AnalyticsDashboard() {
   // Check if there's no data
   if (!analyticsData || analyticsData.kpis.totalClaims === 0) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-background">
         {/* Header - same as before */}
-        <header className="bg-white border-b border-gray-200">
+        <header className="bg-card border-b border-border">
           <div className="container mx-auto px-4 py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
-                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-green-600">
-                  <BarChart3 className="h-6 w-6 text-white" />
+                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary">
+                  <BarChart3 className="h-6 w-6 text-primary-foreground" />
                 </div>
                 <div>
-                  <h1 className="text-2xl font-bold text-gray-900">Advanced Analytics</h1>
-                  <p className="text-sm text-gray-600">Analisi avanzata del sistema anti-frode</p>
+                  <h1 className="text-2xl font-bold text-foreground">Advanced Analytics</h1>
+                  <p className="text-sm text-muted-foreground">Analisi avanzata del sistema anti-frode</p>
                 </div>
               </div>
               <div className="flex items-center space-x-4">
-                <div className="flex bg-gray-100 rounded-lg p-1">
+                <div className="flex bg-muted rounded-lg p-1">
                   {(['7d', '30d', '90d', '1y', 'all'] as const).map((timeframe) => (
                     <button
                       key={timeframe}
                       onClick={() => setSelectedTimeframe(timeframe)}
                       className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
                         selectedTimeframe === timeframe
-                          ? 'bg-white text-gray-900 shadow-sm'
-                          : 'text-gray-600 hover:text-gray-900'
+                          ? 'bg-background text-foreground shadow-sm'
+                          : 'text-muted-foreground hover:text-foreground'
                       }`}
                     >
                       {timeframe === '7d' ? '7 giorni' : 
@@ -559,9 +565,9 @@ export default function AnalyticsDashboard() {
         {/* No Data Message */}
         <div className="container mx-auto px-4 py-16">
           <div className="text-center">
-            <BarChart3 className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">Nessun Dato Disponibile</h2>
-            <p className="text-gray-600 mb-6">
+            <BarChart3 className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+            <h2 className="text-xl font-semibold text-foreground mb-2">Nessun Dato Disponibile</h2>
+            <p className="text-muted-foreground mb-6">
               Non ci sono sinistri nel database per il periodo selezionato. 
               Genera alcuni dati sintetici per vedere le analytics.
             </p>
@@ -575,22 +581,22 @@ export default function AnalyticsDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200">
+      <header className="bg-card border-b border-border">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-green-600">
-                <BarChart3 className="h-6 w-6 text-white" />
+              <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary">
+                <BarChart3 className="h-6 w-6 text-primary-foreground" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Advanced Analytics</h1>
-                <p className="text-sm text-gray-600">Analisi avanzata del sistema anti-frode</p>
+                <h1 className="text-2xl font-bold text-foreground">Advanced Analytics</h1>
+                <p className="text-sm text-muted-foreground">Analisi avanzata del sistema anti-frode</p>
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <div className="flex bg-gray-100 rounded-lg p-1">
+              <div className="flex bg-muted rounded-lg p-1">
                 {(['7d', '30d', '90d', '1y', 'all'] as const).map((timeframe) => (
                   <button
                     key={timeframe}

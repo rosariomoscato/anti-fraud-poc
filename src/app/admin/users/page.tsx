@@ -92,15 +92,15 @@ export default function UsersPage() {
   if (isPending || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-red-600"></div>
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen bg-gradient-to-br from-primary/5 to-primary/10">
       {/* Header */}
-      <header className="border-b bg-white/80 backdrop-blur-sm dark:bg-gray-900/80">
+      <header className="border-b bg-card/80 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
@@ -113,12 +113,12 @@ export default function UsersPage() {
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Indietro
               </Button>
-              <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-red-600">
-                <Users className="h-6 w-6 text-white" />
+              <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary">
+                <Users className="h-6 w-6 text-primary-foreground" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-gray-900 dark:text-white">Gestione Utenti</h1>
-                <p className="text-xs text-gray-600 dark:text-gray-400">Visualizza e gestisci tutti gli utenti</p>
+                <h1 className="text-xl font-bold text-foreground">Gestione Utenti</h1>
+                <p className="text-xs text-muted-foreground">Visualizza e gestisci tutti gli utenti</p>
               </div>
             </div>
             <div className="flex items-center space-x-4">
@@ -134,10 +134,10 @@ export default function UsersPage() {
       <main className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Page Header */}
         <div className="mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+          <h2 className="text-2xl font-bold text-foreground mb-2">
             Tutti gli Utenti
           </h2>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-muted-foreground">
             Gestisci gli utenti registrati e i loro ruoli nel sistema
           </p>
         </div>
@@ -156,11 +156,11 @@ export default function UsersPage() {
           <CardContent>
             {users.length === 0 ? (
               <div className="text-center py-8">
-                <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-foreground mb-2">
                   Nessun utente trovato
                 </h3>
-                <p className="text-gray-600 dark:text-gray-400">
+                <p className="text-muted-foreground">
                   Non ci sono utenti registrati nel sistema.
                 </p>
               </div>
@@ -181,14 +181,14 @@ export default function UsersPage() {
                       <TableRow key={user.id}>
                         <TableCell className="font-medium">
                           <div className="flex items-center space-x-3">
-                            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700">
+                            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-muted">
                               {user.name ? user.name.charAt(0).toUpperCase() : user.email.charAt(0).toUpperCase()}
                             </div>
                             <div>
-                              <div className="font-medium">
+                              <div className="font-medium text-foreground">
                                 {user.name || 'Utente senza nome'}
                               </div>
-                              <div className="text-sm text-gray-500 dark:text-gray-400">
+                              <div className="text-sm text-muted-foreground">
                                 ID: {user.id.slice(0, 8)}...
                               </div>
                             </div>

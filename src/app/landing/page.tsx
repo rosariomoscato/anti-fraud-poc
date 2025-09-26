@@ -40,24 +40,26 @@ export default function LandingPage() {
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-gray-600">Reindirizzamento alla dashboard...</p>
+          <p className="text-muted-foreground">Reindirizzamento alla dashboard...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div className="min-h-screen bg-gradient-to-br from-primary/5 to-primary/10">
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-16 text-center">
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center justify-center mb-6">
-            <Shield className="h-16 w-16 text-red-600" />
+            <div className="flex items-center justify-center w-20 h-20 bg-primary/10 rounded-lg">
+              <Shield className="h-14 w-14 text-primary" />
+            </div>
           </div>
-          <h1 className="text-5xl font-bold text-gray-900 mb-6">
+          <h1 className="text-5xl font-bold text-foreground mb-6">
             Sistema Avanzato di Rilevamento Frodi Assicurative
           </h1>
-          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
             Proteggi la tua azienda dalle frodi con intelligenza artificiale, machine learning e analytics in tempo reale
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -74,19 +76,19 @@ export default function LandingPage() {
       {/* Features Section */}
       <section id="funzionalita" className="container mx-auto px-4 py-16">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">Funzionalità Principali</h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <h2 className="text-3xl font-bold text-foreground mb-4">Funzionalità Principali</h2>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Una soluzione completa per la gestione e prevenzione delle frodi assicurative
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           <Card className="p-6 text-center hover:shadow-lg transition-shadow">
-            <div className="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-lg mx-auto mb-4">
-              <BarChart3 className="h-6 w-6 text-blue-600" />
+            <div className="flex items-center justify-center w-12 h-12 bg-primary/10 rounded-lg mx-auto mb-4">
+              <BarChart3 className="h-6 w-6 text-primary" />
             </div>
-            <h3 className="text-xl font-semibold mb-3">Dashboard in Tempo Reale</h3>
-            <p className="text-gray-600">
+            <h3 className="text-xl font-semibold text-foreground mb-3">Dashboard in Tempo Reale</h3>
+            <p className="text-muted-foreground">
               Monitoraggio continuo delle attività con metriche aggiornate e visualizzazioni interattive
             </p>
           </Card>
@@ -95,8 +97,8 @@ export default function LandingPage() {
             <div className="flex items-center justify-center w-12 h-12 bg-red-100 rounded-lg mx-auto mb-4">
               <AlertTriangle className="h-6 w-6 text-red-600" />
             </div>
-            <h3 className="text-xl font-semibold mb-3">Rilevamento AI</h3>
-            <p className="text-gray-600">
+            <h3 className="text-xl font-semibold text-foreground mb-3">Rilevamento AI</h3>
+            <p className="text-muted-foreground">
               Algoritmi avanzati di machine learning per identificare pattern sospetti e frodi
             </p>
           </Card>
@@ -105,8 +107,8 @@ export default function LandingPage() {
             <div className="flex items-center justify-center w-12 h-12 bg-orange-100 rounded-lg mx-auto mb-4">
               <Search className="h-6 w-6 text-orange-600" />
             </div>
-            <h3 className="text-xl font-semibold mb-3">Gestione Indagini</h3>
-            <p className="text-gray-600">
+            <h3 className="text-xl font-semibold text-foreground mb-3">Gestione Indagini</h3>
+            <p className="text-muted-foreground">
               Sistema completo per tracciare e gestire le indagini in corso con assegnazione automatica
             </p>
           </Card>
@@ -115,18 +117,18 @@ export default function LandingPage() {
             <div className="flex items-center justify-center w-12 h-12 bg-green-100 rounded-lg mx-auto mb-4">
               <TrendingUp className="h-6 w-6 text-green-600" />
             </div>
-            <h3 className="text-xl font-semibold mb-3">Analytics Avanzate</h3>
-            <p className="text-gray-600">
+            <h3 className="text-xl font-semibold text-foreground mb-3">Analytics Avanzate</h3>
+            <p className="text-muted-foreground">
               Analisi predittiva e report dettagliati per identificare trend e pattern di frode
             </p>
           </Card>
 
           <Card className="p-6 text-center hover:shadow-lg transition-shadow">
-            <div className="flex items-center justify-center w-12 h-12 bg-purple-100 rounded-lg mx-auto mb-4">
-              <Database className="h-6 w-6 text-purple-600" />
+            <div className="flex items-center justify-center w-12 h-12 bg-primary/10 rounded-lg mx-auto mb-4">
+              <Database className="h-6 w-6 text-primary" />
             </div>
-            <h3 className="text-xl font-semibold mb-3">Dati Sintetici</h3>
-            <p className="text-gray-600">
+            <h3 className="text-xl font-semibold text-foreground mb-3">Dati Sintetici</h3>
+            <p className="text-muted-foreground">
               Generazione di dati di test realistici per addestrare e migliorare i modelli di detection
             </p>
           </Card>
@@ -135,8 +137,8 @@ export default function LandingPage() {
             <div className="flex items-center justify-center w-12 h-12 bg-yellow-100 rounded-lg mx-auto mb-4">
               <Zap className="h-6 w-6 text-yellow-600" />
             </div>
-            <h3 className="text-xl font-semibold mb-3">Performance Ottimale</h3>
-            <p className="text-gray-600">
+            <h3 className="text-xl font-semibold text-foreground mb-3">Performance Ottimale</h3>
+            <p className="text-muted-foreground">
               Processamento rapido e scalabile con tempi di risposta inferiori al secondo
             </p>
           </Card>
