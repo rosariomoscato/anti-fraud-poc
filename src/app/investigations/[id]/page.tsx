@@ -77,12 +77,43 @@ export default function InvestigationDetailPage() {
   const loadInvestigationDetail = async () => {
     setLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Try to fetch real data from API
+      const response = await fetch(`/api/investigations/${id}`);
       
-      // Mock data for investigation details
-      const mockInvestigation: InvestigationDetail = {
-        id: id,
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          setInvestigation(data.data);
+          setNotes(data.data.investigationNotes?.join('\n\n') || '');
+          
+          // Generate mock history based on the investigation data
+          const mockHistory = generateHistory(data.data);
+          setHistory(mockHistory);
+          return;
+        }
+      }
+      
+      // Fallback to mock data if API fails
+      console.log('API failed, using mock data as fallback');
+      await loadMockData();
+      
+    } catch (error) {
+      console.error('Error loading investigation detail:', error);
+      // Fallback to mock data on error
+      await loadMockData();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadMockData = async () => {
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    // Mock data for investigation details - use ID to determine which investigation to show
+    const mockInvestigations: Record<string, InvestigationDetail> = {
+      "1": {
+        id: "1",
         claimNumber: "CLM-2024-0892",
         claimantName: "Mario Rossi",
         claimantEmail: "mario.rossi@email.com",
@@ -106,47 +137,170 @@ export default function InvestigationDetailPage() {
           "Contattato testimoni potenziali - nessuna risposta",
           "Verifica telecamere di sicurezza in corso"
         ]
-      };
+      },
+      "2": {
+        id: "2",
+        claimNumber: "CLM-2024-0891",
+        claimantName: "Laura Bianchi",
+        claimantEmail: "laura.bianchi@email.com",
+        claimantPhone: "+39 333 7654321",
+        claimType: "COLLISION",
+        incidentDate: "2024-09-14",
+        incidentLocation: "Milano, MI - Corso Buenos Aires 45",
+        incidentDescription: "Incidente stradale con danni significativi al veicolo. Testimoni riportano versioni contraddittorie sull'accaduto.",
+        riskScore: 92,
+        status: "OPEN",
+        priority: "URGENT",
+        assignedTo: "Da assegnare",
+        estimatedAmount: 35000,
+        fraudIndicators: ["Importo elevato", "Testimoni contraddittori", "Danni sospetti", "Circostanze poco chiare"],
+        lastUpdated: "1 ora fa",
+        claimStatus: "PENDING",
+        createdAt: "2024-09-14",
+        investigationNotes: [
+          "Alto rischio di frode (92/100)",
+          "Richiesta analisi dei testimoni",
+          "Da assegnare a investigatore urgente"
+        ]
+      },
+      "3": {
+        id: "3",
+        claimNumber: "CLM-2024-0889",
+        claimantName: "Giuseppe Verdi",
+        claimantEmail: "giuseppe.verdi@email.com",
+        claimantPhone: "+39 333 9876543",
+        claimType: "VANDALISM",
+        incidentDate: "2024-09-12",
+        incidentLocation: "Napoli, NA - Piazza del Plebiscito 10",
+        incidentDescription: "Danni vandalici al veicolo parcheggiato. Richiedente ha storico di multiple rivendicazioni per danni simili.",
+        riskScore: 78,
+        status: "UNDER_REVIEW",
+        priority: "MEDIUM",
+        assignedTo: "Agent. Russo",
+        estimatedAmount: 8500,
+        fraudIndicators: ["Storico frodi", "Multiple rivendicazioni", "Pattern sospetto", "Importo medio"],
+        lastUpdated: "5 ore fa",
+        claimStatus: "PENDING",
+        createdAt: "2024-09-12",
+        investigationNotes: [
+          "Rischio medio-alto (78/100)",
+          "Richiedente con storico di frodi",
+          "Sotto analisi per pattern comportamentali"
+        ]
+      },
+      "4": {
+        id: "4",
+        claimNumber: "CLM-2024-0890",
+        claimantName: "Anna Neri",
+        claimantEmail: "anna.neri@email.com",
+        claimantPhone: "+39 333 4567890",
+        claimType: "COLLISION",
+        incidentDate: "2024-09-10",
+        incidentLocation: "Torino, TO - Via Garibaldi 23",
+        incidentDescription: "Incidente stradale con danni minori. Documentazione completa e coerente, testimoni affidabili.",
+        riskScore: 45,
+        status: "COMPLETED",
+        priority: "LOW",
+        assignedTo: "Agent. Ferrari",
+        estimatedAmount: 3500,
+        fraudIndicators: ["Danni minori", "Basso rischio", "Documentazione completa"],
+        lastUpdated: "1 giorno fa",
+        claimStatus: "APPROVED",
+        createdAt: "2024-09-10",
+        investigationNotes: [
+          "Basso rischio (45/100)",
+          "Documentazione verificata e completa",
+          "Indagine completata con esito positivo"
+        ]
+      },
+      "5": {
+        id: "5",
+        claimNumber: "CLM-2024-0888",
+        claimantName: "Carlo Mancini",
+        claimantEmail: "carlo.mancini@email.com",
+        claimantPhone: "+39 333 1357924",
+        claimType: "THEFT",
+        incidentDate: "2024-09-08",
+        incidentLocation: "Palermo, PA - Via Roma 555",
+        incidentDescription: "Presunto furto di veicolo di lusso. Indagine ha rivelato documenti falsi e dichiarazioni fraudolente.",
+        riskScore: 88,
+        status: "CLOSED",
+        priority: "HIGH",
+        assignedTo: "Agent. Esposito",
+        estimatedAmount: 42000,
+        fraudIndicators: ["Frode confermata", "Documenti falsi", "Importo elevato", "Dichiarazioni fraudolente"],
+        lastUpdated: "3 giorni fa",
+        claimStatus: "REJECTED",
+        createdAt: "2024-09-08",
+        investigationNotes: [
+          "Alto rischio (88/100)",
+          "Frode confermata dopo indagine",
+          "Documentazione falsa identificata",
+          "Caso chiuso con frode accertata"
+        ]
+      }
+    };
 
-      const mockHistory: InvestigationHistory[] = [
-        {
-          id: "1",
-          timestamp: "2024-09-15 14:30",
-          action: "Creazione Indagine",
-          user: "Sistema",
-          details: "Indagine creata automaticamente per alto rischio (85/100)"
-        },
-        {
-          id: "2",
-          timestamp: "2024-09-15 15:45",
-          action: "Assegnazione",
-          user: "Supervisore",
-          details: "Assegnato a Agent. Bianchi"
-        },
-        {
-          id: "3",
-          timestamp: "2024-09-16 09:15",
-          action: "Aggiornamento Stato",
-          user: "Agent. Bianchi",
-          details: "Stato aggiornato a IN_PROGRESS"
-        },
-        {
-          id: "4",
-          timestamp: "2024-09-16 10:30",
-          action: "Nota Aggiunta",
-          user: "Agent. Bianchi",
-          details: "Richiesta documentazione aggiuntiva al richiedente"
-        }
-      ];
+    const mockInvestigation = mockInvestigations[id] || mockInvestigations["1"];
+    const mockHistory = generateHistory(mockInvestigation);
 
-      setInvestigation(mockInvestigation);
-      setHistory(mockHistory);
-      setNotes(mockInvestigation.investigationNotes?.join('\n\n') || '');
-    } catch (error) {
-      console.error('Error loading investigation detail:', error);
-    } finally {
-      setLoading(false);
+    setInvestigation(mockInvestigation);
+    setHistory(mockHistory);
+    setNotes(mockInvestigation.investigationNotes?.join('\n\n') || '');
+  };
+
+  const generateHistory = (investigation: InvestigationDetail): InvestigationHistory[] => {
+    const baseHistory = [
+      {
+        id: "1",
+        timestamp: new Date(investigation.createdAt).toLocaleString('it-IT'),
+        action: "Creazione Indagine",
+        user: "Sistema",
+        details: `Indagine creata automaticamente per rischio ${investigation.riskScore > 70 ? 'alto' : investigation.riskScore > 50 ? 'medio' : 'basso'} (${investigation.riskScore}/100)`
+      }
+    ];
+
+    if (investigation.assignedTo && investigation.assignedTo !== 'Da assegnare') {
+      baseHistory.push({
+        id: "2",
+        timestamp: new Date(Date.parse(investigation.createdAt) + 86400000).toLocaleString('it-IT'), // +1 day
+        action: "Assegnazione",
+        user: "Supervisore",
+        details: `Assegnato a ${investigation.assignedTo}`
+      });
     }
+
+    if (investigation.status === 'IN_PROGRESS') {
+      baseHistory.push({
+        id: "3",
+        timestamp: new Date(Date.parse(investigation.createdAt) + 172800000).toLocaleString('it-IT'), // +2 days
+        action: "Aggiornamento Stato",
+        user: investigation.assignedTo || "Sistema",
+        details: "Stato aggiornato a IN_PROGRESS"
+      });
+    }
+
+    if (investigation.status === 'COMPLETED') {
+      baseHistory.push({
+        id: "4",
+        timestamp: new Date().toLocaleString('it-IT'),
+        action: "Completamento Indagine",
+        user: investigation.assignedTo || "Sistema",
+        details: "Indagine completata con esito positivo"
+      });
+    }
+
+    if (investigation.status === 'CLOSED') {
+      baseHistory.push({
+        id: "4",
+        timestamp: new Date().toLocaleString('it-IT'),
+        action: "Chiusura Caso",
+        user: investigation.assignedTo || "Sistema",
+        details: "Caso chiuso"
+      });
+    }
+
+    return baseHistory;
   };
 
   const getStatusBadge = (status: string) => {
@@ -265,7 +419,7 @@ export default function InvestigationDetailPage() {
               </Button>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">{investigation.claimNumber}</h1>
-                <p className="text-sm text-gray-600">Dettagli Indagine</p>
+                <p className="text-sm text-gray-600">Dettagli Indagine (ID: {id})</p>
               </div>
             </div>
             <div className="flex items-center space-x-2">

@@ -202,7 +202,7 @@ export default function InvestigationsPage() {
       }
     } catch (error) {
       console.error('Error loading investigations:', error);
-      // Fallback to mock data
+      // Fallback to mock data - same complete data as the main mock
       const mockInvestigations: Investigation[] = [
         {
           id: "1",
@@ -229,9 +229,55 @@ export default function InvestigationsPage() {
           riskScore: 92,
           status: "OPEN",
           priority: "URGENT",
+          assignedTo: "Da assegnare",
           estimatedAmount: 35000,
           fraudIndicators: ["Importo elevato", "Testimoni contraddittori", "Danni sospetti"],
           lastUpdated: "1 ora fa"
+        },
+        {
+          id: "3",
+          claimNumber: "CLM-2024-0889",
+          claimantName: "Giuseppe Verdi",
+          claimType: "VANDALISM",
+          incidentDate: "2024-09-12",
+          incidentLocation: "Napoli, NA",
+          riskScore: 78,
+          status: "UNDER_REVIEW",
+          priority: "MEDIUM",
+          assignedTo: "Agent. Russo",
+          estimatedAmount: 8500,
+          fraudIndicators: ["Storico frodi", "Multiple rivendicazioni"],
+          lastUpdated: "5 ore fa"
+        },
+        {
+          id: "4",
+          claimNumber: "CLM-2024-0890",
+          claimantName: "Anna Neri",
+          claimType: "COLLISION",
+          incidentDate: "2024-09-10",
+          incidentLocation: "Torino, TO",
+          riskScore: 45,
+          status: "COMPLETED",
+          priority: "LOW",
+          assignedTo: "Agent. Ferrari",
+          estimatedAmount: 3500,
+          fraudIndicators: ["Danni minori"],
+          lastUpdated: "1 giorno fa"
+        },
+        {
+          id: "5",
+          claimNumber: "CLM-2024-0888",
+          claimantName: "Carlo Mancini",
+          claimType: "THEFT",
+          incidentDate: "2024-09-08",
+          incidentLocation: "Palermo, PA",
+          riskScore: 88,
+          status: "CLOSED",
+          priority: "HIGH",
+          assignedTo: "Agent. Esposito",
+          estimatedAmount: 42000,
+          fraudIndicators: ["Frode confermata", "Documenti falsi"],
+          lastUpdated: "3 giorni fa"
         }
       ];
 
