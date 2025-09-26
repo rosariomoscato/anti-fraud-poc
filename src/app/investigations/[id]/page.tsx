@@ -6,6 +6,23 @@ import { useSession } from "@/lib/auth-client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { 
   ArrowLeft, 
   User, 
@@ -65,6 +82,18 @@ export default function InvestigationDetailPage() {
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [notes, setNotes] = useState<string>('');
+  
+  // Modal states
+  const [showStatusModal, setShowStatusModal] = useState(false);
+  const [showAssignModal, setShowAssignModal] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
+  
+  // Form states
+  const [selectedStatus, setSelectedStatus] = useState<string>('');
+  const [selectedInvestigator, setSelectedInvestigator] = useState<string>('');
+  const [customInvestigator, setCustomInvestigator] = useState<string>('');
+  const [reportFormat, setReportFormat] = useState<'html' | 'json' | 'csv'>('html');
+  const [updating, setUpdating] = useState(false);
 
   useEffect(() => {
     if (!isPending && !session) {
@@ -376,6 +405,150 @@ export default function InvestigationDetailPage() {
     }
   };
 
+  const updateInvestigationStatus = async () => {
+    if (!investigation || !selectedStatus) return;
+    
+    setUpdating(true);
+    try {
+      const response = await fetch('/api/investigations', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: investigation.id,
+          status: selectedStatus,
+          assignedTo: investigation.assignedTo
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          // Update local state
+          setInvestigation({
+            ...investigation,
+            status: selectedStatus as InvestigationDetail['status']
+          });
+          
+          // Add history entry
+          const newHistory: InvestigationHistory = {
+            id: Date.now().toString(),
+            timestamp: new Date().toLocaleString('it-IT'),
+            action: "Aggiornamento Stato",
+            user: "Utente Corrente",
+            details: `Stato aggiornato a ${selectedStatus}`
+          };
+          setHistory([newHistory, ...history]);
+          
+          setShowStatusModal(false);
+          setSelectedStatus('');
+        }
+      } else {
+        console.error('Failed to update status');
+      }
+    } catch (error) {
+      console.error('Error updating investigation status:', error);
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const assignInvestigator = async () => {
+    if (!investigation) return;
+    
+    const investigatorName = selectedInvestigator === 'custom' ? customInvestigator : selectedInvestigator;
+    if (!investigatorName) return;
+    
+    setUpdating(true);
+    try {
+      const response = await fetch('/api/investigations', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: investigation.id,
+          status: investigation.status,
+          assignedTo: investigatorName
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          // Update local state
+          setInvestigation({
+            ...investigation,
+            assignedTo: investigatorName
+          });
+          
+          // Add history entry
+          const newHistory: InvestigationHistory = {
+            id: Date.now().toString(),
+            timestamp: new Date().toLocaleString('it-IT'),
+            action: "Assegnazione",
+            user: "Utente Corrente",
+            details: `Assegnato a ${investigatorName}`
+          };
+          setHistory([newHistory, ...history]);
+          
+          setShowAssignModal(false);
+          setSelectedInvestigator('');
+          setCustomInvestigator('');
+        }
+      } else {
+        console.error('Failed to assign investigator');
+      }
+    } catch (error) {
+      console.error('Error assigning investigator:', error);
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const generateReport = async () => {
+    if (!investigation) return;
+    
+    setUpdating(true);
+    try {
+      const assignedToParam = investigation.assignedTo ? `&assignedTo=${encodeURIComponent(investigation.assignedTo)}` : '';
+      const response = await fetch(`/api/investigations/${id}/report?format=${reportFormat}${assignedToParam}`, {
+        method: 'GET',
+      });
+
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `investigation-${investigation.claimNumber}-report.${reportFormat === 'html' ? 'html' : reportFormat}`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        
+        setShowReportModal(false);
+      } else {
+        console.error('Failed to generate report');
+      }
+    } catch (error) {
+      console.error('Error generating report:', error);
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  // Available investigators
+  const availableInvestigators = [
+    "Agent. Bianchi",
+    "Agent. Russo", 
+    "Agent. Ferrari",
+    "Agent. Esposito",
+    "Agent. Romano",
+    "custom"
+  ];
+
   if (isPending || loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -565,15 +738,27 @@ export default function InvestigationDetailPage() {
             <Card className="p-6">
               <h2 className="text-xl font-semibold text-gray-900 mb-4">Azioni Rapide</h2>
               <div className="space-y-3">
-                <Button variant="outline" className="w-full justify-start">
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start"
+                  onClick={() => setShowStatusModal(true)}
+                >
                   <RefreshCw className="h-4 w-4 mr-2" />
                   Aggiorna Stato
                 </Button>
-                <Button variant="outline" className="w-full justify-start">
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start"
+                  onClick={() => setShowAssignModal(true)}
+                >
                   <User className="h-4 w-4 mr-2" />
                     Assegna Investigatore
                 </Button>
-                <Button variant="outline" className="w-full justify-start">
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start"
+                  onClick={() => setShowReportModal(true)}
+                >
                   <FileText className="h-4 w-4 mr-2" />
                   Genera Report
                 </Button>
@@ -618,6 +803,138 @@ export default function InvestigationDetailPage() {
           </div>
         </div>
       </main>
+
+      {/* Status Update Modal */}
+      <Dialog open={showStatusModal} onOpenChange={setShowStatusModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Aggiorna Stato Indagine</DialogTitle>
+            <DialogDescription>
+              Seleziona il nuovo stato per l&apos;indagine {investigation?.claimNumber}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="status">Nuovo Stato</Label>
+              <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleziona stato" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="OPEN">Aperto</SelectItem>
+                  <SelectItem value="IN_PROGRESS">In Corso</SelectItem>
+                  <SelectItem value="UNDER_REVIEW">In Revisione</SelectItem>
+                  <SelectItem value="COMPLETED">Completato</SelectItem>
+                  <SelectItem value="CLOSED">Chiuso</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowStatusModal(false)}>
+              Annulla
+            </Button>
+            <Button 
+              onClick={updateInvestigationStatus} 
+              disabled={!selectedStatus || updating}
+            >
+              {updating ? 'Aggiornamento...' : 'Aggiorna Stato'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Assign Investigator Modal */}
+      <Dialog open={showAssignModal} onOpenChange={setShowAssignModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Assegna Investigatore</DialogTitle>
+            <DialogDescription>
+              Assegna l&apos;indagine {investigation?.claimNumber} a un investigatore
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="investigator">Investigatore</Label>
+              <Select value={selectedInvestigator} onValueChange={setSelectedInvestigator}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleziona investigatore" />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableInvestigators.filter(inv => inv !== 'custom').map(investigator => (
+                    <SelectItem key={investigator} value={investigator}>
+                      {investigator}
+                    </SelectItem>
+                  ))}
+                  <SelectItem value="custom">Altro...</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            {selectedInvestigator === 'custom' && (
+              <div>
+                <Label htmlFor="custom-investigator">Nome Investigatore</Label>
+                <Input
+                  id="custom-investigator"
+                  value={customInvestigator}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCustomInvestigator(e.target.value)}
+                  placeholder="Inserisci nome investigatore"
+                />
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAssignModal(false)}>
+              Annulla
+            </Button>
+            <Button 
+              onClick={assignInvestigator} 
+              disabled={(!selectedInvestigator || (selectedInvestigator === 'custom' && !customInvestigator)) || updating}
+            >
+              {updating ? 'Assegnazione...' : 'Assegna'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Generate Report Modal */}
+      <Dialog open={showReportModal} onOpenChange={setShowReportModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Genera Report</DialogTitle>
+            <DialogDescription>
+              Genera un report dettagliato per l&apos;indagine {investigation?.claimNumber}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="format">Formato Report</Label>
+              <Select value={reportFormat} onValueChange={(value: 'html' | 'json' | 'csv') => setReportFormat(value)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="html">HTML (Report Professionale)</SelectItem>
+                  <SelectItem value="json">JSON (Dati Strutturati)</SelectItem>
+                  <SelectItem value="csv">CSV (Excel Compatible)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="text-sm text-gray-600">
+              {reportFormat === 'html' && 'Report professionale formattato con tutti i dettagli dell\'indagine'}
+              {reportFormat === 'json' && 'Dati strutturati in formato JSON per elaborazione automatica'}
+              {reportFormat === 'csv' && 'Dati in formato CSV compatibile con Excel e altri strumenti'}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowReportModal(false)}>
+              Annulla
+            </Button>
+            <Button onClick={generateReport} disabled={updating}>
+              {updating ? 'Generazione...' : 'Genera Report'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
