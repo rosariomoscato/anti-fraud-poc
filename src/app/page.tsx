@@ -29,12 +29,15 @@ interface DashboardStats {
 
 interface RecentActivity {
   id: string;
-  type: 'claim' | 'detection' | 'investigation';
+  claimId: string;
+  type: 'new_claim' | 'fraud_detection' | 'investigation_started' | 'status_change' | 'high_priority_alert';
   claimNumber: string;
   claimant: string;
   riskScore: number;
   status: string;
   timestamp: string;
+  description: string;
+  significance: 'low' | 'medium' | 'high' | 'critical';
 }
 
 export default function Home() {
@@ -114,6 +117,7 @@ export default function Home() {
       "FRAUD_DETECTED": { variant: "destructive", label: "Frode Rilevata" },
       "UNDER_INVESTIGATION": { variant: "default", label: "In Indagine" },
       "APPROVED": { variant: "secondary", label: "Approvato" },
+      "REJECTED": { variant: "destructive", label: "Rifiutato" },
       "PENDING": { variant: "outline", label: "In Attesa" }
     };
 
@@ -121,19 +125,27 @@ export default function Home() {
     return <Badge variant={config.variant}>{config.label}</Badge>;
   };
 
-  const getActivityIcon = (type: string) => {
+  const getActivityIcon = (type: string, significance: string = 'medium') => {
     switch (type) {
-      case "claim":
-        return <div className="p-2 bg-blue-100 rounded-lg">
+      case "new_claim":
+        return <div className="p-2 bg-blue-100 rounded-lg border-2 border-blue-500">
           <BarChart3 className="h-4 w-4 text-blue-600" />
         </div>;
-      case "detection":
-        return <div className="p-2 bg-red-100 rounded-lg">
+      case "fraud_detection":
+        return <div className="p-2 bg-red-100 rounded-lg border-2 border-red-500">
           <AlertTriangle className="h-4 w-4 text-red-600" />
         </div>;
-      case "investigation":
-        return <div className="p-2 bg-orange-100 rounded-lg">
+      case "investigation_started":
+        return <div className="p-2 bg-orange-100 rounded-lg border-2 border-orange-500">
           <Search className="h-4 w-4 text-orange-600" />
+        </div>;
+      case "status_change":
+        return <div className="p-2 bg-purple-100 rounded-lg border-2 border-purple-500">
+          <TrendingUp className="h-4 w-4 text-purple-600" />
+        </div>;
+      case "high_priority_alert":
+        return <div className="p-2 bg-red-100 rounded-lg border-2 border-red-500">
+          <Shield className="h-4 w-4 text-red-600" />
         </div>;
       default:
         return <div className="p-2 bg-gray-100 rounded-lg">
@@ -238,19 +250,21 @@ export default function Home() {
           <Card className="p-6">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-semibold text-gray-900">Attività Recenti</h2>
-              <Button variant="outline" size="sm">
-                <Eye className="h-4 w-4 mr-2" />
-                Vedi Tutti
+              <Button variant="outline" size="sm" asChild>
+                <Link href="/activity">
+                  <Eye className="h-4 w-4 mr-2" />
+                  Vedi Tutti
+                </Link>
               </Button>
             </div>
             <div className="space-y-4">
               {recentActivity.map((activity) => (
-                <div key={activity.id} className="flex items-center space-x-4 p-3 bg-gray-50 rounded-lg">
-                  {getActivityIcon(activity.type)}
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between">
-                      <p className="font-medium text-gray-900">{activity.claimNumber}</p>
-                      <div className="flex items-center space-x-2">
+                <div key={activity.id} className="flex items-start space-x-4 p-3 bg-gray-50 rounded-lg">
+                  {getActivityIcon(activity.type, activity.significance)}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between mb-1">
+                      <p className="font-medium text-gray-900 truncate">{activity.claimNumber}</p>
+                      <div className="flex items-center space-x-2 flex-shrink-0">
                         <div className="flex items-center space-x-1">
                           <div className={`w-2 h-2 rounded-full ${getRiskColor(activity.riskScore)}`}></div>
                           <span className="text-sm font-medium">{activity.riskScore}</span>
@@ -258,9 +272,10 @@ export default function Home() {
                         {getStatusBadge(activity.status)}
                       </div>
                     </div>
-                    <div className="flex items-center justify-between mt-1">
-                      <p className="text-sm text-gray-600">{activity.claimant}</p>
-                      <p className="text-xs text-gray-500">{activity.timestamp}</p>
+                    <p className="text-sm text-gray-700 mb-1">{activity.description}</p>
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm text-gray-600 truncate">{activity.claimant}</p>
+                      <p className="text-xs text-gray-500 flex-shrink-0">{activity.timestamp}</p>
                     </div>
                   </div>
                 </div>
