@@ -19,6 +19,10 @@ export const metadata: Metadata = {
   title: "Anti-Fraud System | Rilevamento Frodi Assicurative",
   description:
     "Sistema avanzato di rilevamento frodi per sinistri automobilistici con intelligenza artificiale, machine learning e analytics dashboard per investigatori assicurativi.",
+  icons: {
+    icon: '/icon.svg',
+    apple: '/apple-icon.svg',
+  },
 };
 
 export default function RootLayout({

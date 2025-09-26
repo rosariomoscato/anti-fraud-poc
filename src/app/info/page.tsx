@@ -129,30 +129,30 @@ export default function InfoPage() {
                   Fattori di Calcolo
                 </h3>
                 <div className="space-y-3">
-                  <div className="p-4 bg-red-50 rounded-lg border-l-4 border-red-600 dark:bg-red-900/20 dark:border-red-500">
-                    <h4 className="font-medium text-gray-900 dark:text-gray-100">Importo Transazione</h4>
-                    <p className="text-sm text-gray-800 dark:text-gray-200">
+                  <div className="p-4 bg-red-900 rounded-lg border-l-4 border-red-600 dark:bg-red-900/30 dark:border-red-500">
+                    <h4 className="font-medium text-white dark:text-gray-100">Importo Transazione</h4>
+                    <p className="text-sm text-white dark:text-gray-200">
                       Transazioni di importo elevato ricevono un punteggio di rischio maggiore
                     </p>
                   </div>
                   
-                  <div className="p-4 bg-orange-50 rounded-lg border-l-4 border-orange-600 dark:bg-orange-900/20 dark:border-orange-500">
-                    <h4 className="font-medium text-gray-900 dark:text-gray-100">Frequenza</h4>
-                    <p className="text-sm text-gray-800 dark:text-gray-200">
+                  <div className="p-4 bg-orange-900 rounded-lg border-l-4 border-orange-600 dark:bg-orange-900/30 dark:border-orange-500">
+                    <h4 className="font-medium text-white dark:text-gray-100">Frequenza</h4>
+                    <p className="text-sm text-white dark:text-gray-200">
                       Numero di transazioni in un intervallo di tempo ristretto
                     </p>
                   </div>
                   
-                  <div className="p-4 bg-yellow-50 rounded-lg border-l-4 border-yellow-600 dark:bg-yellow-900/20 dark:border-yellow-500">
-                    <h4 className="font-medium text-gray-900 dark:text-gray-100">Comportamento Anomalo</h4>
-                    <p className="text-sm text-gray-800 dark:text-gray-200">
+                  <div className="p-4 bg-yellow-900 rounded-lg border-l-4 border-yellow-600 dark:bg-yellow-900/30 dark:border-yellow-500">
+                    <h4 className="font-medium text-white dark:text-gray-100">Comportamento Anomalo</h4>
+                    <p className="text-sm text-white dark:text-gray-200">
                       Deviazioni dai pattern normali di comportamento
                     </p>
                   </div>
                   
-                  <div className="p-4 bg-blue-50 rounded-lg border-l-4 border-blue-600 dark:bg-blue-900/20 dark:border-blue-500">
-                    <h4 className="font-medium text-gray-900 dark:text-gray-100">Localizzazione Geografica</h4>
-                    <p className="text-sm text-gray-800 dark:text-gray-200">
+                  <div className="p-4 bg-blue-900 rounded-lg border-l-4 border-blue-600 dark:bg-blue-900/30 dark:border-blue-500">
+                    <h4 className="font-medium text-white dark:text-gray-100">Localizzazione Geografica</h4>
+                    <p className="text-sm text-white dark:text-gray-200">
                       Transazioni da location insolite o sospette
                     </p>
                   </div>
@@ -164,17 +164,17 @@ export default function InfoPage() {
                   Livelli di Rischio
                 </h3>
                 <div className="grid md:grid-cols-3 gap-4">
-                  <div className="text-center p-4 bg-green-50 rounded-lg dark:bg-green-900/20">
-                    <div className="text-2xl font-bold text-green-600 dark:text-yellow-100">0-30</div>
-                    <div className="text-sm font-medium text-gray-900 dark:text-yellow-200">Basso Rischio</div>
+                  <div className="text-center p-4 bg-green-900 rounded-lg dark:bg-green-900/30">
+                    <div className="text-2xl font-bold text-white dark:text-yellow-100">0-30</div>
+                    <div className="text-sm font-medium text-white dark:text-yellow-200">Basso Rischio</div>
                   </div>
-                  <div className="text-center p-4 bg-yellow-50 rounded-lg dark:bg-yellow-900/20">
-                    <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-100">31-70</div>
-                    <div className="text-sm font-medium text-gray-900 dark:text-yellow-200">Medio Rischio</div>
+                  <div className="text-center p-4 bg-yellow-900 rounded-lg dark:bg-yellow-900/30">
+                    <div className="text-2xl font-bold text-white dark:text-yellow-100">31-70</div>
+                    <div className="text-sm font-medium text-white dark:text-yellow-200">Medio Rischio</div>
                   </div>
-                  <div className="text-center p-4 bg-red-50 rounded-lg dark:bg-red-900/20">
-                    <div className="text-2xl font-bold text-red-600 dark:text-yellow-100">71-100</div>
-                    <div className="text-sm font-medium text-gray-900 dark:text-yellow-200">Alto Rischio</div>
+                  <div className="text-center p-4 bg-red-900 rounded-lg dark:bg-red-900/30">
+                    <div className="text-2xl font-bold text-white dark:text-yellow-100">71-100</div>
+                    <div className="text-sm font-medium text-white dark:text-yellow-200">Alto Rischio</div>
                   </div>
                 </div>
               </div>

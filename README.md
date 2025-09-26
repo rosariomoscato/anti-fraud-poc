@@ -1,221 +1,276 @@
-# Agentic Coding Boilerplate
+# Anti-Fraud System
 
-A complete agentic coding boilerplate with authentication, PostgreSQL database, AI chat functionality, and modern UI components - perfect for building AI-powered applications and autonomous agents.
+Sistema avanzato di rilevamento frodi per sinistri automobilistici con intelligenza artificiale, machine learning e analytics dashboard per investigatori assicurativi.
 
-## 🚀 Features
+## 🎯 Cos'è
 
-- **🔐 Authentication**: Better Auth with Google OAuth integration
-- **🗃️ Database**: Drizzle ORM with PostgreSQL
-- **🤖 AI Integration**: Vercel AI SDK with OpenAI support
-- **🎨 UI Components**: shadcn/ui with Tailwind CSS
-- **⚡ Modern Stack**: Next.js 15, React 19, TypeScript
-- **📱 Responsive**: Mobile-first design approach
+Un'applicazione web completa progettata per aiutare le compagnie assicurative a identificare e gestire potenziali frodi nei sinistri automobilistici. Il sistema utilizza algoritmi avanzati di risk scoring per analizzare i sinistri e identificare pattern anomali che potrebbero indicare attività fraudolente.
 
-## ☕ Buy Me a Coffee
+## 🔧 A che serve
 
-If you find this project helpful and would like to support my work, consider buying me a coffee! Your support helps me maintain and improve this boilerplate.
+- **Rilevamento Frodi**: Analisi automatica dei sinistri per identificare potenziali frodi
+- **Risk Assessment**: Calcolo automatico dell'indice di rischio frode per ogni sinistro
+- **Gestione Investigazioni**: Assegnazione sistematica delle indagini agli investigatori
+- **Dashboard Analitica**: Visualizzazione in tempo reale dei dati e delle tendenze
+- **Report Dettagliati**: Esportazione delle analisi in vari formati (HTML, JSON, CSV)
 
-[Buy Me a Coffee](https://paypal.me/rosmoscato)
+## 🛠️ Tecnologie Utilizzate
 
-## 📋 Prerequisites
+### Frontend
+- **Next.js 15**: Framework React full-stack con App Router
+- **TypeScript**: Tipizzazione sicura per il codice JavaScript
+- **Tailwind CSS**: Framework CSS per styling moderno e responsive
+- **shadcn/ui**: Componenti UI accessibili e personalizzabili
+- **Lucide React**: Icone moderne e scalabili
 
-Before you begin, ensure you have the following installed on your machine:
+### Backend & Database
+- **Node.js**: Runtime JavaScript per il server
+- **Drizzle ORM**: Query builder TypeScript per PostgreSQL
+- **PostgreSQL**: Database relazionale robusto
+- **Better Auth**: Sistema di autenticazione moderno e sicuro
 
-- **Node.js**: Version 18.0 or higher (<a href="https://nodejs.org/" target="_blank">Download here</a>)
-- **Git**: For cloning the repository (<a href="https://git-scm.com/" target="_blank">Download here</a>)
-- **PostgreSQL**: Either locally installed or access to a hosted service like Vercel Postgres
+### Analytics & AI
+- **Recharts**: Libreria per grafici e visualizzazioni dati
+- **Custom Risk Engine**: Algoritmi proprietari per il calcolo del rischio frode
 
-## 🛠️ Quick Setup
+## ⭐ Punti di Forza
 
-### 1. Clone or Download the Repository
+### 🔍 Algoritmi di Rilevamento Avanzati
+- Analisi multifattoriale del rischio frode
+- Considerazione di importo, frequenza, comportamento anomalo e localizzazione
+- Risk score calcolato in tempo reale (0-100)
 
-**Option A: Clone with Git**
+### 📊 Dashboard Intuitiva
+- Visualizzazione dati in tempo reale
+- Grafici interattivi e filtri dinamici
+- Interfaccia responsive per desktop e mobile
+
+### 🔄 Gestione Completa del Ciclo di Vita
+- Creazione e gestione sinistri
+- Assegnazione automatica agli investigatori
+- Tracciamento dello stato delle indagini
+- Reportistica dettagliata
+
+### 🎨 Design System Coerente
+- Interfaccia moderna e accessibile
+- Tema chiaro/scuro integrato
+- Componenti riutilizzabili e consistenti
+
+## 💻 Risorse Necessarie
+
+### Requisiti Minimi
+- **Node.js**: Versione 18.0 o superiore
+- **Git**: Per il controllo versione
+- **PostgreSQL**: Versione 14 o superiore (locale o cloud)
+- **RAM**: Minimo 4GB, consigliati 8GB
+- **Storage**: Minimo 2GB di spazio libero
+
+### Requisiti Consigliati
+- **Node.js**: Versione 20.x o superiore
+- **PostgreSQL**: Versione 15.x o superiore
+- **RAM**: 8GB o più
+- **Storage**: 5GB o più
+- **Processore**: Multi-core per migliori performance
+
+## 🚀 Installazione e Configurazione
+
+### 1. Clona il Repository
 
 ```bash
-git clone https://gitea.rosmoscato.xyz/ros/agentic-coding-starter-kit.git
-cd agentic-coding-starter-kit
+git clone https://gitea.rosmoscato.xyz/ros/anti-fraud-poc.git
+cd anti-fraud-poc
 ```
 
-**Option B: Download ZIP**
-Download the repository as a ZIP file and extract it to your desired location.
-
-### 2. Install Dependencies
+### 2. Installa le Dipendenze
 
 ```bash
 npm install
 ```
 
-### 3. Environment Setup
+### 3. Configurazione dell'Ambiente
 
-Copy the example environment file:
+Copia il file di ambiente di esempio:
 
 ```bash
-cp env.example .env
+cp example.env .env
 ```
 
-Fill in your environment variables in the `.env` file:
+Configura le variabili d'ambiente nel file `.env`:
 
 ```env
-# Database
-POSTGRES_URL="postgresql://username:password@localhost:5432/your_database_name"
+# Database PostgreSQL
+POSTGRES_URL="postgresql://username:password@localhost:5432/anti_fraud_db"
 
-# Authentication - Better Auth
-BETTER_AUTH_SECRET="your-random-32-character-secret-key-here"
+# Autenticazione
+BETTER_AUTH_SECRET="tua-secret-key-di-32-caratteri"
 
-# Google OAuth (Get from Google Cloud Console)
-GOOGLE_CLIENT_ID="your-google-client-id"
-GOOGLE_CLIENT_SECRET="your-google-client-secret"
+# Google OAuth (da Google Cloud Console)
+GOOGLE_CLIENT_ID="tuo-google-client-id"
+GOOGLE_CLIENT_SECRET="tuo-google-client-secret"
 
-# AI Integration (Optional - for chat functionality)
-OPENAI_API_KEY="sk-your-openai-api-key-here"
-OPENAI_MODEL="gpt-5-mini"
+# OpenAI API (per funzionalità AI opzionali)
+OPENAI_API_KEY="tuo-openai-api-key"
+OPENAI_MODEL="gpt-4o-mini"
 
-# App URL (for production deployments)
+# URL dell'applicazione
 NEXT_PUBLIC_APP_URL="http://localhost:3000"
 ```
 
-### 4. Database Setup
+### 4. Setup del Database
 
-Generate and run database migrations:
+Genera ed esegui le migrazioni del database:
 
 ```bash
 npm run db:generate
 npm run db:migrate
 ```
 
-### 5. Start the Development Server
+### 5. Avvia il Server di Sviluppo
 
 ```bash
 npm run dev
 ```
 
-Your application will be available at [http://localhost:3000](http://localhost:3000)
+L'applicazione sarà disponibile all'indirizzo [http://localhost:3000](http://localhost:3000)
 
-## ⚙️ Service Configuration
-
-### PostgreSQL Database on Vercel
-
-1. Go to <a href="https://vercel.com/dashboard" target="_blank">Vercel Dashboard</a>
-2. Navigate to the **Storage** tab
-3. Click **Create** → **Postgres**
-4. Choose your database name and region
-5. Copy the `POSTGRES_URL` from the `.env.local` tab
-6. Add it to your `.env` file
-
-### Google OAuth Credentials
-
-1. Go to <a href="https://console.cloud.google.com/" target="_blank">Google Cloud Console</a>
-2. Create a new project or select an existing one
-3. Navigate to **Credentials** → **Create Credentials** → **OAuth 2.0 Client ID**
-4. Set application type to **Web application**
-5. Add authorized redirect URIs:
-   - `http://localhost:3000/api/auth/callback/google` (development)
-   - `https://yourdomain.com/api/auth/callback/google` (production)
-6. Copy the **Client ID** and **Client Secret** to your `.env` file
-
-### OpenAI API Key
-
-1. Go to <a href="https://platform.openai.com/dashboard" target="_blank">OpenAI Platform</a>
-2. Navigate to **API Keys** in the sidebar
-3. Click **Create new secret key**
-4. Give it a name and copy the key
-5. Add it to your `.env` file as `OPENAI_API_KEY`
-
-## 🗂️ Project Structure
+## 🗂️ Struttura del Progetto
 
 ```
 src/
-├── app/                    # Next.js app directory
-│   ├── api/               # API routes
-│   │   ├── auth/          # Authentication endpoints
-│   │   └── chat/          # AI chat endpoint
-│   ├── chat/              # AI chat page
-│   ├── dashboard/         # User dashboard
-│   └── page.tsx           # Home page
-├── components/            # React components
-│   ├── auth/             # Authentication components
-│   └── ui/               # shadcn/ui components
-└── lib/                  # Utilities and configurations
-    ├── auth.ts           # Better Auth configuration
-    ├── auth-client.ts    # Client-side auth utilities
-    ├── db.ts             # Database connection
-    ├── schema.ts         # Database schema
-    └── utils.ts          # General utilities
+├── app/                          # Next.js App Router
+│   ├── api/                     # API routes
+│   │   ├── auth/                # Autenticazione
+│   │   ├── claims/              # Gestione sinistri
+│   │   ├── dashboard/           # Dati dashboard
+│   │   ├── investigations/      # Gestione indagini
+│   │   └── analytics/           # Analytics e report
+│   ├── page.tsx                 # Dashboard principale
+│   ├── claims/                  # Pagina sinistri
+│   ├── info/                    # Pagina informativa
+│   ├── admin/                   # Amministrazione
+│   └── investigations/          # Pagina indagini
+├── components/                  # Componenti React
+│   ├── ui/                      # Componenti shadcn/ui
+│   ├── auth/                    # Componenti autenticazione
+│   ├── charts/                  # Componenti grafici
+│   └── forms/                   # Componenti form
+├── lib/                         # Utilità e configurazioni
+│   ├── db.ts                    # Connessione database
+│   ├── schema.ts                # Schema Drizzle
+│   ├── auth.ts                  # Configurazione auth
+│   ├── risk-calculator.ts       # Motore rischio frode
+│   └── utils.ts                 # Funzioni utility
+└── types/                       # TypeScript types
 ```
 
-## 🔧 Available Scripts
+## 🔡 Script Disponibili
 
 ```bash
-npm run dev          # Start development server with Turbopack
-npm run build        # Build for production
-npm run start        # Start production server
-npm run lint         # Run ESLint
-npm run db:generate  # Generate database migrations
-npm run db:migrate   # Run database migrations
-npm run db:push      # Push schema changes to database
-npm run db:studio    # Open Drizzle Studio (database GUI)
-npm run db:dev       # Push schema for development
-npm run db:reset     # Reset database (drop all tables)
+npm run dev              # Avvia server sviluppo
+npm run build            # Build per produzione
+npm run start            # Avvia server produzione
+npm run lint             # Esegui ESLint
+npm run typecheck        # Controllo tipi TypeScript
+
+# Database
+npm run db:generate      # Genera migrazioni
+npm run db:migrate       # Esegui migrazioni
+npm run db:push          # Push schema al database
+npm run db:studio        # Apri Drizzle Studio
+npm run db:dev           # Push schema per sviluppo
+npm run db:reset         # Reset database
 ```
 
-## 📖 Pages Overview
+## 📊 Funzionalità Principali
 
-- **Home (`/`)**: Landing page with setup instructions and features overview
-- **Dashboard (`/dashboard`)**: Protected user dashboard with profile information
-- **Chat (`/chat`)**: AI-powered chat interface using OpenAI (requires authentication)
+### 🎯 Calcolo Indice di Frode
+Il sistema calcola un indice di rischio frode (0-100) basato su:
+
+- **Importo Transazione**: Transazioni di importo elevato ricevono punteggi maggiori
+- **Frequenza**: Numero di sinistri in un intervallo di tempo ristretto
+- **Comportamento Anomalo**: Deviazioni dai pattern normali
+- **Localizzazione Geografica**: Transazioni da location insolite
+
+### 📈 Dashboard Analytics
+- Visualizzazione in tempo reale dei sinistri sospetti
+- Trend di frode e analisi storiche
+- Fattori di rischio principali
+- Distribuzione geografica delle frodi
+
+### 📋 Gestione Sinistri
+- Form completo per l'inserimento sinistri
+- Validazione automatica dei dati
+- Calcolo immediato del rischio frode
+- Generazione report investigativi
+
+### 👥 Gestione Investigatori
+- Assegnazione automatica delle indagini
+- Tracciamento stato investigazioni
+- Dashboard personalizzata per investigatori
+- Sistema di notifiche
+
+## 🌐 Pagine dell'Applicazione
+
+- **Dashboard (`/`)**: Panoramica principale con statistiche e metriche
+- **Nuovo Sinistro (`/claims/new`)**: Form per inserimento nuovi sinistri
+- **Investigazioni (`/investigations`)**: Gestione delle indagini in corso
+- **Analytics (`/analytics`)**: Analisi avanzate e report
+- **Info (`/info`)**: Guida e informazioni sul sistema
+- **Admin (`/admin`)**: Pannello amministrativo
 
 ## 🚀 Deployment
 
-### Deploy to Vercel (Recommended)
+### Vercel (Consigliato)
 
-1. Install the Vercel CLI globally:
-
+1. Installa Vercel CLI:
    ```bash
    npm install -g vercel
    ```
 
-2. Deploy your application:
-
+2. Deploy dell'applicazione:
    ```bash
    vercel --prod
    ```
 
-3. Follow the prompts to configure your deployment
-4. Add your environment variables when prompted or via the Vercel dashboard
+3. Configura le variabili d'ambiente nel dashboard Vercel
 
-### Production Environment Variables
+### Variabili d'Ambiente di Produzione
 
-Ensure these are set in your production environment:
+Assicurati di configurare queste variabili in produzione:
 
-- `POSTGRES_URL` - Production PostgreSQL connection string
-- `BETTER_AUTH_SECRET` - Secure random 32+ character string
+- `POSTGRES_URL` - Stringa connessione PostgreSQL
+- `BETTER_AUTH_SECRET` - Secret key per autenticazione
 - `GOOGLE_CLIENT_ID` - Google OAuth Client ID
 - `GOOGLE_CLIENT_SECRET` - Google OAuth Client Secret
-- `OPENAI_API_KEY` - OpenAI API key (optional)
-- `OPENAI_MODEL` - OpenAI model name (optional, defaults to gpt-5-mini)
-- `NEXT_PUBLIC_APP_URL` - Your production domain
+- `OPENAI_API_KEY` - OpenAI API key (opzionale)
+- `NEXT_PUBLIC_APP_URL` - URL dell'applicazione in produzione
 
+## 🤝 Contribuire
 
-## 🤝 Contributing
+1. Fork del repository
+2. Crea un branch feature (`git checkout -b feature/nuova-funzionalita`)
+3. Commit delle modifiche (`git commit -m 'Aggiungi nuova funzionalità'`)
+4. Push del branch (`git push origin feature/nuova-funzionalita`)
+5. Apri una Pull Request
 
-1. Fork this repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+## 📝 Licenza
 
-## 📝 License
+Questo progetto è sotto licenza MIT - vedi il file [LICENSE](LICENSE) per i dettagli.
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+## 🆘 Supporto
 
-## 🆘 Need Help?
+Se riscontri problemi:
 
-If you encounter any issues:
+1. Controlla la sezione [Issues](https://gitea.rosmoscato.xyz/ros/anti-fraud-poc/issues)
+2. Rivedi la documentazione sopra
+3. Crea una nuova issue con informazioni dettagliate sul problema
 
-1. Check the [Issues](https://gitea.rosmoscato.xyz/ros/agentic-coding-starter-kit/issues) section
-2. Review the documentation above
-3. Create a new issue with detailed information about your problem
+## ☕ Supporta il Progetto
+
+Se trovi questo progetto utile e vuoi supportare il mio lavoro, considera di offrirmi un caffè! Il tuo supporto mi aiuta a mantenere e migliorare questo sistema.
+
+[Buy Me a Coffee](https://paypal.me/rosmoscato)
 
 ---
 
-**Happy coding! 🚀**
+**Sviluppato con ❤️ da RoMoS**

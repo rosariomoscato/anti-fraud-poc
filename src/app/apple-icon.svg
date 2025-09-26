@@ -1,0 +1,13 @@
+<svg width="180" height="180" viewBox="0 0 180 180" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="90" cy="90" r="85" fill="#DC2626"/>
+  
+  <!-- Shield shape -->
+  <path d="M90 18 L20 45 L20 90 C20 123.75 47.5 155.25 90 165 C132.5 155.25 160 123.75 160 90 L160 45 L90 18Z" fill="white" stroke="white" stroke-width="2"/>
+  
+  <!-- Inner shield detail -->
+  <path d="M90 36 L35 56 L35 90 C35 117 56.5 143 90 150 C123.5 143 145 117 145 90 L145 56 L90 36Z" fill="#DC2626"/>
+  
+  <!-- Checkmark -->
+  <path d="M62 90 L82.5 110.5 L118 75" stroke="white" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+</svg>
