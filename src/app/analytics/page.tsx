@@ -34,12 +34,14 @@ import {
   MapPin,
   Users,
   Shield,
-  FileText,
   AlertCircle,
   ChevronLeft,
   ChevronRight,
   TrendingDown,
-  X
+  X,
+  FileSpreadsheet,
+  FileText,
+  File
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -76,6 +78,7 @@ export default function AnalyticsDashboard() {
   const [cityDetails, setCityDetails] = useState<any>(null);
   const [cityDetailsLoading, setCityDetailsLoading] = useState(false);
   const [showDetailedMap, setShowDetailedMap] = useState(false);
+  const [showExportMenu, setShowExportMenu] = useState(false);
   
   // Case Explorer state
   const [cases, setCases] = useState<any[]>([]);
@@ -275,6 +278,80 @@ export default function AnalyticsDashboard() {
       setCaseDetails(null);
     } finally {
       setCaseDetailsLoading(false);
+    }
+  };
+
+  const exportData = async (format: 'csv' | 'json' | 'pdf') => {
+    try {
+      // Build export context based on current state
+      const exportContext = {
+        tab: activeTab,
+        timeframe: selectedTimeframe,
+        filters: {
+          search: searchTerm,
+          riskLevel: filterRisk,
+          pattern: filterType,
+          fraudType: filterStatus,
+          startDate: '',
+          endDate: ''
+        },
+        patternAnalysis: {
+          selectedPatterns: patternFilters
+        }
+      };
+
+      const response = await fetch('/api/analytics/export', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          format,
+          context: exportContext
+        }),
+      });
+
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        
+        // Generate filename based on current context
+        const timestamp = new Date().toISOString().split('T')[0];
+        const tabName = activeTab === 'overview' ? 'panoramica' : 
+                       activeTab === 'cases' ? 'case-explorer' : 
+                       activeTab === 'patterns' ? 'pattern-analysis' : 'geographic';
+        
+        let filename, fileExtension;
+        if (format === 'pdf') {
+          filename = `anti-fraud-${tabName}-${timestamp}.html`;
+          fileExtension = 'html';
+        } else {
+          filename = `anti-fraud-${tabName}-${timestamp}.${format}`;
+          fileExtension = format;
+        }
+        
+        // Download directly for all formats
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        // For PDF, show additional instructions
+        if (format === 'pdf') {
+          setTimeout(() => {
+            alert('Report HTML scaricato come "' + filename + '"!\n\nPer convertirlo in PDF:\n1. Apri il file .html scaricato\n2. Premi Ctrl+P (o Cmd+P su Mac)\n3. Seleziona "Salva come PDF" come destinazione\n4. Clicca "Salva"\n\nIl file HTML può anche essere aperto direttamente nel browser per visualizzare il report.');
+          }, 500);
+        }
+        window.URL.revokeObjectURL(url);
+      } else {
+        console.error('Error exporting data:', await response.text());
+      }
+    } catch (error) {
+      console.error('Error exporting data:', error);
+    } finally {
+      setShowExportMenu(false);
     }
   };
 
@@ -531,10 +608,44 @@ export default function AnalyticsDashboard() {
                   </button>
                 ))}
               </div>
-              <Button variant="outline" size="sm">
-                <Download className="h-4 w-4 mr-2" />
-                Esporta
-              </Button>
+              <div className="relative">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setShowExportMenu(!showExportMenu)}
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  Esporta
+                </Button>
+                
+                {showExportMenu && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                    <div className="py-1">
+                      <button
+                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        onClick={() => exportData('csv')}
+                      >
+                        <FileSpreadsheet className="h-4 w-4 inline mr-2" />
+                        Esporta come CSV
+                      </button>
+                      <button
+                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        onClick={() => exportData('json')}
+                      >
+                        <FileText className="h-4 w-4 inline mr-2" />
+                        Esporta come JSON
+                      </button>
+                      <button
+                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        onClick={() => exportData('pdf')}
+                      >
+                        <File className="h-4 w-4 inline mr-2" />
+                        Esporta Report (HTML→PDF)
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
               <Button variant="outline" size="sm" onClick={loadAnalyticsData}>
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Aggiorna
