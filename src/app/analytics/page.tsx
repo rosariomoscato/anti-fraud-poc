@@ -1269,7 +1269,7 @@ export default function AnalyticsDashboard() {
 
         {/* Case Details Modal */}
         <Dialog open={!!selectedCase} onOpenChange={(open) => !open && setSelectedCase(null)}>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="flex items-center text-xl">
                 <FileText className="h-5 w-5 mr-2 text-blue-600" />
@@ -1347,11 +1347,11 @@ export default function AnalyticsDashboard() {
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-600">Codice Fiscale:</span>
-                        <span className="font-medium">{caseDetails.claimantId}</span>
+                        <span className="font-medium break-all">{caseDetails.claimantId}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-600">Email:</span>
-                        <span className="font-medium">{caseDetails.claimantEmail}</span>
+                        <span className="font-medium break-all">{caseDetails.claimantEmail}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-600">Telefono:</span>
