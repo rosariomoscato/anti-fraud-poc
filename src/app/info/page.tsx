@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Shield, BarChart3, Database, Code, Mail, Linkedin, ExternalLink, FileText, Eye, CheckCircle, Zap, Users } from "lucide-react";
+import { Shield, BarChart3, Database, Code, Mail, Linkedin, ExternalLink, FileText, Eye, CheckCircle, Zap, Users, Info } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ModeToggle } from "@/components/ui/mode-toggle";
@@ -17,12 +17,12 @@ export default function InfoPage() {
               href="/"
               className="flex items-center space-x-3 hover:opacity-80 transition-opacity"
             >
-              <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-red-600">
-                <Shield className="h-6 w-6 text-white" />
+              <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-blue-600">
+                <Info className="h-6 w-6 text-white" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-gray-900 dark:text-white">Anti-Fraud System</h1>
-                <p className="text-xs text-gray-600 dark:text-gray-400">Sistema di Rilevamento Frodi</p>
+                <h1 className="text-xl font-bold text-gray-900 dark:text-white">Info</h1>
+                <p className="text-xs text-gray-600 dark:text-gray-400">Guida e Informazioni</p>
               </div>
             </Link>
             <ModeToggle />
@@ -32,20 +32,6 @@ export default function InfoPage() {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8 max-w-4xl">
-        {/* Hero Section */}
-        <div className="text-center mb-12">
-          <div className="flex justify-center mb-4">
-            <div className="flex items-center justify-center w-20 h-20 rounded-full bg-red-600/10 dark:bg-red-600/20">
-              <Shield className="h-12 w-12 text-red-600" />
-            </div>
-          </div>
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-            Anti-Fraud System
-          </h1>
-          <p className="text-xl text-gray-600 dark:text-gray-400">
-            Sistema Avanzato di Rilevamento e Analisi delle Frodi
-          </p>
-        </div>
 
         {/* Features Overview */}
         <Card className="mb-8">
